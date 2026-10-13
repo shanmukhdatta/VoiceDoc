@@ -1,0 +1,10 @@
+.gradle/
+.idea/
+local.properties
+**/build/
+**/.cxx/
+*.apk
+*.aab
+*.jks
+*.keystore
+device-report.json
