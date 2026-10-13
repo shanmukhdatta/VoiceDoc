@@ -61,3 +61,10 @@ Run: `python scripts/phase00/collect_device_info.py --output device-report.json`
 
 ## Next review
 Record device facts, test artifact hashes, model+runtime exact versions, error logs, and test outcomes in a dated append-only result record before reconsidering the phase gate.
+
+## Verification run (2026-10-13, local sandbox; not Android hardware)
+- Python helper exact Git blob SHA: `44d60c093644c1c6f7ae5457fec7174cede35c8c` (matched GitHub).
+- `python -m py_compile scripts/phase00/collect_device_info.py` **PASS** (local source hash matched GitHub).
+- `python scripts/phase00/collect_device_info.py --help` **PASS**.
+- `python -m unittest discover -s tests/phase00 -p 'test_*.py' -v` **3/3 PASS**, with only mocked ADB responses; initial test harness argument-handling bug was corrected before commit.
+- The sandbox could not clone GitHub over network; final files and SHA were checked through the connected GitHub API. No physical phone, model, Android build, or network isolation test has run.
