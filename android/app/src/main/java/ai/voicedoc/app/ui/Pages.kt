@@ -210,20 +210,7 @@ internal fun ChatPage(
 }
 
 @Composable
-internal fun SourcesPage(isTe: Boolean) {
-    Page {
-        Section(
-            if (isTe) "వైద్య సమాచార మూలాలు" else "Medical knowledge and sources",
-            if (isTe) "ఇంకా అనుమతి పొందిన, వైద్య నిపుణులు సమీక్షించిన మూలాలు ఇన్‌స్టాల్ కాలేదు. కల్పిత మూలాలు చూపబడవు."
-            else "No licensed, reviewed medical knowledge pack is installed. We do not invent references or cite unavailable sources."
-        )
-        Text(
-            if (isTe) "మూలాలు జోడించినప్పుడు ప్రచురణకర్త, శీర్షిక, తేదీ, భాష, లైసెన్స్ కనిపిస్తాయి."
-            else "Approved sources will display publisher, title, date, language, and license.",
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
-}
+internal fun SourcesPage(isTe: Boolean) = LocalSourcesPage(isTe)
 
 @Composable
 internal fun ModelsPage(isTe: Boolean) = ExperimentalModelPage(isTe)
