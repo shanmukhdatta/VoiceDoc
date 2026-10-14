@@ -18,7 +18,7 @@ class EncryptedHistoryInstrumentedTest {
     private lateinit var store: EncryptedHistoryStore
 
     @Before fun setup() {
-        store = EncryptedHistoryStore(context)
+        store = EncryptedHistoryStore(context, namespace = "instrumentation-only")
         store.erase()
     }
 
