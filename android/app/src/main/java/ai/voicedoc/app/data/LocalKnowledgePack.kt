@@ -31,7 +31,7 @@ data class KnowledgeSearchResult(
  * IMPORTANT: a schema and checksum do NOT prove a corpus is clinically reviewed or licensed.
  * This viewer is deliberately separate from medical answer generation.
  */
-class LocalKnowledgePack(private val context: Context, namespace: String = "default") {
+class LocalKnowledgePack(private val context: Context, private val namespace: String = "default") {
     init { require(Regex("^[a-zA-Z0-9_-]{1,32}$").matches(namespace)) }
     private val directory get() = File(context.noBackupFilesDir, "medical-reference-dev")
     private val target get() = File(directory, "candidate-$namespace.sqlite")
