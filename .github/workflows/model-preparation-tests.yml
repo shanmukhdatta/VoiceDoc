@@ -1,0 +1,18 @@
+name: Local Model Preparation Checks
+on:
+  pull_request:
+    paths:
+      - "ml/preparation/**"
+      - ".github/workflows/model-preparation-tests.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preparation-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m unittest discover -s ml/preparation -p "test_*.py" -v
