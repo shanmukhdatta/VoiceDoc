@@ -1,5 +1,10 @@
 # Voice Doctor AI
 
+> **Current initial-release language scope: English and Telugu only.** Mentions of Tamil below describe possible future research, NOT a feature in this release.
+>
+> **Implementation status (October 2026):** Native Android prototype and offline infrastructure are being implemented in stacked GitHub PRs. The production Gemma/Whisper/ONNX inference, approved bilingual medical corpus, clinically validated safety, and guaranteed Telugu offline TTS are **NOT available yet**. Read [phase coverage](docs/progress/full-phase-coverage.md) before evaluating claims. General health information only, not diagnosis or treatment.
+
+
 > **A privacy-first, multilingual, fully on-device health-information assistant for Android that accepts speech, retrieves relevant curated medical knowledge locally, runs a lightweight language model on the phone, and returns grounded text or speech without requiring an internet connection for inference.**
 
 ---
