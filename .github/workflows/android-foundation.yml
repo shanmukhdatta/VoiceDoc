@@ -33,13 +33,11 @@ jobs:
         run: ./gradlew --version
       - name: Unit tests and build debug APK
         run: ./gradlew :core:common:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest --stacktrace
-      - name: Verify manifest does not request Internet
+      - name: Check source manifest explicitly removes network permissions
         run: |
-          if grep -Rq 'android.permission.INTERNET' app/src/main/AndroidManifest.xml; then
-            echo "Unexpected Internet permission in manifest"
-            exit 1
-          fi
-          echo "Source manifest has no INTERNET declaration"
+          grep -q 'android.permission.INTERNET" tools:node="remove"' app/src/main/AndroidManifest.xml
+          grep -q 'android.permission.ACCESS_NETWORK_STATE" tools:node="remove"' app/src/main/AndroidManifest.xml
+          echo "Explicit network-permission removals are present; compiled APK audit is authoritative."
 
       - name: Upload installable debug APK for prototype testing
         if: success()
