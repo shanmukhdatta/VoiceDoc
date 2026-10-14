@@ -23,7 +23,11 @@ class NavigationSmokeTest {
     @Test fun onboardingChatAndSafeUnavailableResponse() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         context.getSharedPreferences("voicedoc_public_settings", Context.MODE_PRIVATE)
-            .edit().remove("onboarding_complete").commit()
+            .edit()
+            .remove("onboarding_complete")
+            .putString("language", "en")
+            .putBoolean("encrypted_history_enabled", false)
+            .commit()
         ActivityScenario.launch(MainActivity::class.java).use {
             compose.onNodeWithText("I understand — Continue").performClick()
             compose.onNodeWithText("Open text chat").performClick()
