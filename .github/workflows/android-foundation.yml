@@ -32,7 +32,7 @@ jobs:
       - name: Verify Gradle version
         run: ./gradlew --version
       - name: Unit tests and build debug APK
-        run: ./gradlew :core:common:testDebugUnitTest :app:assembleDebug --stacktrace
+        run: ./gradlew :core:common:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest --stacktrace
       - name: Verify manifest does not request Internet
         run: |
           if grep -Rq 'android.permission.INTERNET' app/src/main/AndroidManifest.xml; then
