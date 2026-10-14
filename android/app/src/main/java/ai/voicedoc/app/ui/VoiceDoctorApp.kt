@@ -28,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import ai.voicedoc.core.common.SupportedLanguage
+import ai.voicedoc.app.data.EncryptedHistoryStore
+import ai.voicedoc.app.data.SavedConversationTurn
 
 internal enum class Screen { HOME, CHAT, SOURCES, MODELS, SETTINGS, PRIVACY, HISTORY, DIAGNOSTICS, ABOUT, TTS_TEST }
 
@@ -43,7 +45,28 @@ fun VoiceDoctorApp() {
     var routeName by rememberSaveable { mutableStateOf(Screen.HOME.name) }
     val route = Screen.entries.firstOrNull { it.name == routeName } ?: Screen.HOME
     val isTe = languageTag == SupportedLanguage.TELUGU.tag
-    val messages = remember { mutableStateListOf<ChatMessage>() }
+    val encryptedStore = remember(context) { EncryptedHistoryStore(context) }
+    var historyEnabled by rememberSaveable { mutableStateOf(prefs.getBoolean("encrypted_history_enabled", false)) }
+    var historyError by remember { mutableStateOf(false) }
+    val messages = remember {
+        mutableStateListOf<ChatMessage>().also { list ->
+            if (prefs.getBoolean("encrypted_history_enabled", false)) {
+                runCatching { encryptedStore.read() }
+                    .onSuccess { turns -> list.addAll(turns.map { ChatMessage(it.fromUser, it.text) }) }
+                    .onFailure { historyError = true }
+            }
+        }
+    }
+    fun saveHistory() {
+        if (historyEnabled && !historyError) {
+            val snapshot = messages.takeLast(80).map { SavedConversationTurn(it.fromUser, it.message) }
+            runCatching { encryptedStore.write(snapshot) }.onFailure { historyError = true }
+        }
+    }
+    fun eraseHistory() {
+        messages.clear()
+        runCatching { encryptedStore.erase() }.onFailure { historyError = true }
+    }
     fun chooseLanguage(code: String) {
         if (SupportedLanguage.fromTag(code) == null) return
         languageTag = code
@@ -96,12 +119,25 @@ fun VoiceDoctorApp() {
         Column(modifier = Modifier.fillMaxSize().padding(inner)) {
             when (route) {
                 Screen.HOME -> HomePage(isTe, onNavigate = ::navigate)
-                Screen.CHAT -> ChatPage(isTe, messages, onClear = { messages.clear() })
+                Screen.CHAT -> ChatPage(isTe, messages, onClear = { messages.clear() }, onMessagesChanged = { saveHistory() })
                 Screen.SOURCES -> SourcesPage(isTe)
                 Screen.MODELS -> ModelsPage(isTe)
                 Screen.SETTINGS -> SettingsPage(
                     isTe, onLanguage = ::chooseLanguage,
                     onNavigate = ::navigate,
+                    historyEnabled = historyEnabled,
+                    historyError = historyError,
+                    onHistoryToggle = { enabled ->
+                        if (enabled) {
+                            historyEnabled = true
+                            prefs.edit().putBoolean("encrypted_history_enabled", true).apply()
+                            saveHistory()
+                        } else {
+                            historyEnabled = false
+                            prefs.edit().putBoolean("encrypted_history_enabled", false).apply()
+                            eraseHistory()
+                        }
+                    },
                     onReset = {
                         messages.clear()
                         prefs.edit().remove("onboarding_complete").apply()
@@ -109,8 +145,8 @@ fun VoiceDoctorApp() {
                         navigate(Screen.HOME)
                     }
                 )
-                Screen.PRIVACY -> PrivacyPage(isTe, onClear = { messages.clear() })
-                Screen.HISTORY -> HistoryPage(isTe)
+                Screen.PRIVACY -> PrivacyPage(isTe, historyEnabled, onClear = { messages.clear(); saveHistory() })
+                Screen.HISTORY -> HistoryPage(isTe, historyEnabled, messages, onErase = { eraseHistory() })
                 Screen.DIAGNOSTICS -> DiagnosticsPage(isTe)
                 Screen.TTS_TEST -> OfflineVoiceTestPage(isTe)
                 Screen.ABOUT -> AboutPage(isTe)
