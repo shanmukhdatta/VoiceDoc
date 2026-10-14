@@ -21,7 +21,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import ai.voicedoc.app.speech.OnDeviceSpeechService
+import ai.voicedoc.app.speech.DeviceOfflineTts
 import ai.voicedoc.core.common.SupportedLanguage
+import ai.voicedoc.app.metrics.LocalDeviceMetrics
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
@@ -135,6 +137,13 @@ internal fun ChatPage(
         )
     }
     DisposableEffect(localSpeech) { onDispose { localSpeech.stop() } }
+    var localVoiceReady by remember { mutableStateOf(false) }
+    val localVoice = remember(context) { DeviceOfflineTts(context) { localVoiceReady = it } }
+    DisposableEffect(localVoice) { onDispose { localVoice.close() } }
+    var speechPlaybackStatus by remember { mutableStateOf("") }
+    val voiceChoice = if (localVoiceReady)
+        localVoice.available(if (isTe) SupportedLanguage.TELUGU else SupportedLanguage.ENGLISH).firstOrNull()
+    else null
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) {
             localSpeech.start(if (isTe) SupportedLanguage.TELUGU else SupportedLanguage.ENGLISH)
@@ -206,6 +215,22 @@ internal fun ChatPage(
             else "No device-only speech recognizer is installed. Use text input.")
         }
         if (speechStatus.isNotBlank()) Text(speechStatus, style = MaterialTheme.typography.labelMedium)
+        val lastSystem = messages.lastOrNull { !it.fromUser }?.message
+        if (lastSystem != null && voiceChoice != null) {
+            OutlinedButton(onClick = {
+                speechPlaybackStatus = if (localVoice.speak(lastSystem.take(300), voiceChoice))
+                    "Offline speech request queued; verify actual playback in airplane mode."
+                else "Installed offline voice failed to start."
+            }, modifier = Modifier.fillMaxWidth()) {
+                Text(if (isTe) "భద్రతా సందేశాన్ని వినండి" else "Speak latest system notice offline")
+            }
+        } else if (lastSystem != null) {
+            Text(if (isTe)
+                "ఈ భాషలో స్థానిక ఆఫ్‌లైన్ వాయిస్ ఇంకా లేదు."
+            else "No installed offline voice for this language.",
+                style = MaterialTheme.typography.bodySmall)
+        }
+        if (speechPlaybackStatus.isNotBlank()) Text(speechPlaybackStatus)
     }
 }
 
@@ -327,8 +352,18 @@ internal fun HistoryPage(
 
 @Composable
 internal fun DiagnosticsPage(isTe: Boolean) {
+    val context = LocalContext.current
+    var sample by remember { mutableStateOf<ai.voicedoc.app.metrics.DeviceMemorySnapshot?>(null) }
     Page {
         Section("Device", "${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE} · API ${Build.VERSION.SDK_INT}")
+        Button(onClick = { sample = LocalDeviceMetrics.snapshot(context) }) {
+            Text(if (isTe) "రామ్ కొలత తీసుకోండి" else "Measure local memory now")
+        }
+        if (sample != null) {
+            val m = sample!!
+            Section("Live device memory",
+                "Total RAM: ${m.totalRamMb} MB · Available RAM: ${m.availableRamMb} MB · Process PSS: ${m.processPssMb} MB · Native heap: ${m.nativeHeapMb} MB · Low-memory: ${m.lowMemory}")
+        }
         Section(
             if (isTe) "నడుస్తున్న మోడల్" else "Runtime backend",
             if (isTe) "ఏ AI మోడల్ లోడ్ కాలేదు. బెంచ్‌మార్క్ ఫలితాలు లేవు."
