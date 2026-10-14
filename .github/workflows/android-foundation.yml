@@ -48,8 +48,8 @@ jobs:
           fi
           "$AAPT" dump permissions app/build/outputs/apk/debug/app-debug.apk > "$RUNNER_TEMP/voicedoc-apk-permissions.txt"
           cat "$RUNNER_TEMP/voicedoc-apk-permissions.txt"
-          if grep -q 'android.permission.INTERNET' "$RUNNER_TEMP/voicedoc-apk-permissions.txt"; then
-            echo "Merged APK unexpectedly requests INTERNET"; exit 1
+          if grep -Eq 'android.permission.(INTERNET|ACCESS_NETWORK_STATE)' "$RUNNER_TEMP/voicedoc-apk-permissions.txt"; then
+            echo "Merged APK unexpectedly requests a network permission"; exit 1
           fi
 
       - name: Upload installable debug APK for prototype testing
