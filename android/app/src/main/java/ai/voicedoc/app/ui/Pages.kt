@@ -182,18 +182,7 @@ internal fun SourcesPage(isTe: Boolean) {
 }
 
 @Composable
-internal fun ModelsPage(isTe: Boolean) {
-    Page {
-        Text(if (isTe) "ఆఫ్‌లైన్ మోడల్ స్థితి" else "Offline model status", style = MaterialTheme.typography.headlineSmall)
-        for (name in listOf("Voice Activity Detection", "Speech recognition (en/te)", "Multilingual embedding", "Local language model", "English/Telugu TTS")) {
-            Section(name, if (isTe) "ఇన్‌స్టాల్/ధృవీకరణ కాలేదు" else "Not installed or verified")
-        }
-        Text(
-            if (isTe) "మోడల్ ఫైల్‌ను పేరు మార్చడం ద్వారా సరైన మోడల్‌గా గుర్తించము; SHA-256, లైసెన్స్, ఫార్మాట్ పరీక్షలు అవసరం."
-            else "Models require SHA-256, license, format and runtime checks before loading."
-        )
-    }
-}
+internal fun ModelsPage(isTe: Boolean) = ExperimentalModelPage(isTe)
 
 @Composable
 internal fun SettingsPage(
