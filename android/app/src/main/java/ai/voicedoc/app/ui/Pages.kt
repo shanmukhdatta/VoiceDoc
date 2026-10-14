@@ -215,6 +215,9 @@ internal fun SettingsPage(
         OutlinedButton(onClick = { onNavigate(Screen.HISTORY) }, modifier = Modifier.fillMaxWidth()) {
             Text(if (isTe) "చరిత్ర వివరాలు" else "History details")
         }
+        OutlinedButton(onClick = { onNavigate(Screen.TTS_TEST) }, modifier = Modifier.fillMaxWidth()) {
+            Text(if (isTe) "ఆఫ్‌లైన్ వాయిస్ పరీక్ష" else "Test offline voices")
+        }
         OutlinedButton(onClick = { onNavigate(Screen.DIAGNOSTICS) }, modifier = Modifier.fillMaxWidth()) {
             Text(if (isTe) "డయాగ్నోస్టిక్స్" else "Diagnostics")
         }
