@@ -111,7 +111,8 @@ internal fun HomePage(isTe: Boolean, onNavigate: (Screen) -> Unit) {
 internal fun ChatPage(
     isTe: Boolean,
     messages: SnapshotStateList<ChatMessage>,
-    onClear: () -> Unit
+    onClear: () -> Unit,
+    onMessagesChanged: () -> Unit
 ) {
     var input by rememberSaveable { mutableStateOf("") }
     fun submit() {
@@ -119,6 +120,7 @@ internal fun ChatPage(
         if (clean.isEmpty() || clean.length > 1000) return
         messages.add(ChatMessage(true, clean))
         messages.add(ChatMessage(false, OfflineSafetyFallback.respond(clean, isTe)))
+        onMessagesChanged()
         input = ""
     }
     Page {
@@ -153,7 +155,7 @@ internal fun ChatPage(
         Button(onClick = { submit() }, enabled = input.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
             Text(if (isTe) "పంపించు" else "Send")
         }
-        OutlinedButton(onClick = onClear, enabled = messages.isNotEmpty(), modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(onClick = { onClear(); onMessagesChanged() }, enabled = messages.isNotEmpty(), modifier = Modifier.fillMaxWidth()) {
             Text(if (isTe) "ఈ సెషన్ తొలగించు" else "Clear this session")
         }
         Text(
@@ -198,6 +200,9 @@ internal fun SettingsPage(
     isTe: Boolean,
     onLanguage: (String) -> Unit,
     onNavigate: (Screen) -> Unit,
+    historyEnabled: Boolean,
+    historyError: Boolean,
+    onHistoryToggle: (Boolean) -> Unit,
     onReset: () -> Unit
 ) {
     Page {
@@ -209,9 +214,19 @@ internal fun SettingsPage(
         HorizontalDivider()
         Section(
             if (isTe) "చరిత్ర" else "Conversation history",
-            if (isTe) "ఎన్‌క్రిప్టెడ్ చరిత్ర ఇంకా అందుబాటులో లేదు. చాట్ సందేశాలు ఈ సెషన్‌లో మాత్రమే ఉంటాయి."
-            else "Encrypted persistent history is not implemented. Chat messages remain in this session only."
+            if (historyEnabled)
+                (if (isTe) "మీ అనుమతితో మాత్రమే ఎన్‌క్రిప్టెడ్ చరిత్ర నిల్వ జరుగుతుంది." else "Opt-in encrypted local history is enabled.")
+            else
+                (if (isTe) "చరిత్ర ఆఫ్ ఉంది. ఈ సెషన్ చాట్ మాత్రమే అందుబాటులో ఉంది." else "History is off; chat stays in the current session only.")
         )
+        if (historyError) Text(if (isTe) "చరిత్రను సురక్షితంగా చదవడం లేదా నిల్వ చేయడం విఫలమైంది." else "Encrypted history could not be safely read or saved.")
+        OutlinedButton(
+            onClick = { onHistoryToggle(!historyEnabled) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(if (historyEnabled) (if (isTe) "చరిత్ర ఆపివేసి తొలగించు" else "Disable and delete stored history")
+            else (if (isTe) "ఎన్‌క్రిప్టెడ్ చరిత్రకు అనుమతించు" else "Enable encrypted history (opt in)"))
+        }
         OutlinedButton(onClick = { onNavigate(Screen.HISTORY) }, modifier = Modifier.fillMaxWidth()) {
             Text(if (isTe) "చరిత్ర వివరాలు" else "History details")
         }
@@ -234,32 +249,56 @@ internal fun SettingsPage(
 }
 
 @Composable
-internal fun PrivacyPage(isTe: Boolean, onClear: () -> Unit) {
+internal fun PrivacyPage(isTe: Boolean, historyEnabled: Boolean, onClear: () -> Unit) {
     Page {
         Section(
             if (isTe) "ఈ బిల్డ్‌లో గోప్యత" else "Privacy in this build",
             if (isTe)
-                "INTERNET అనుమతి లేదు. మైక్రోఫోన్ అనుమతి లేదు. చాట్ సందేశాలు శాశ్వతంగా నిల్వ చేయబడవు."
+                "INTERNET లేదా మైక్రోఫోన్ అనుమతులు లేవు. చరిత్రను అనుమతిస్తే Android Keystore ఆధారిత ఎన్‌క్రిప్షన్ ఉపయోగిస్తాము."
             else
-                "No INTERNET permission and no microphone permission. Chat text is not persisted; local sessions are cleared when the process exits."
+                "No INTERNET or microphone permission. Opt-in history uses Android Keystore-backed AES-GCM encryption and no-backup storage."
         )
         Section(
-            if (isTe) "భవిష్యత్ ఎంపికలు" else "Future options",
-            if (isTe) "ఎన్‌క్రిప్టెడ్ చరిత్ర, ఆటో తొలగింపు, మోడల్ ప్యాక్ ధృవీకరణ అభివృద్ధిలో ఉన్నాయి."
-            else "Opt-in encrypted history, clear/delete controls and signed model manifests are planned, not active."
+            if (isTe) "ప్రస్తుతం చరిత్ర స్థితి" else "History consent status",
+            if (historyEnabled)
+                (if (isTe) "ఎన్‌క్రిప్టెడ్ చరిత్ర ఆన్ ఉంది." else "Encrypted local history is ON by explicit consent.")
+            else
+                (if (isTe) "శాశ్వత చాట్ నిల్వ ఆఫ్ ఉంది." else "Persistent conversation storage is OFF.")
         )
-        Button(onClick = onClear) { Text(if (isTe) "ఈ సెషన్ తొలగించు" else "Clear chat session now") }
+        Button(onClick = onClear) {
+            Text(if (isTe) "ఈ సెషన్ తొలగించు" else "Clear chat session")
+        }
     }
 }
 
 @Composable
-internal fun HistoryPage(isTe: Boolean) {
+internal fun HistoryPage(
+    isTe: Boolean,
+    enabled: Boolean,
+    messages: SnapshotStateList<ChatMessage>,
+    onErase: () -> Unit
+) {
     Page {
         Section(
-            if (isTe) "చరిత్ర నిల్వ లేదు" else "History storage disabled",
-            if (isTe) "ఎన్‌క్రిప్షన్ అమలయ్యే వరకు ఆరోగ్య సంభాషణలు శాశ్వతంగా నిల్వ కావు."
-            else "Persistent health conversation storage remains disabled until consent, encryption, deletion, and tests are implemented."
+            if (isTe) "స్థానిక చరిత్ర" else "Local conversation history",
+            if (enabled)
+                (if (isTe) "మీ అనుమతితో ఎన్‌క్రిప్ట్ చేసి స్థానికంగా నిల్వ చేయబడుతుంది."
+                else "Enabled with your consent. Stored encrypted on this device without cloud backup.")
+            else
+                (if (isTe) "చరిత్ర నిల్వ ఆఫ్ ఉంది. సెట్టింగ్స్‌లో అనుమతించవచ్చు."
+                else "History is disabled. You can explicitly enable it in Settings.")
         )
+        if (enabled) {
+            for (message in messages) {
+                Section(
+                    if (message.fromUser) (if (isTe) "మీరు" else "You") else "System",
+                    message.message
+                )
+            }
+            Button(onClick = onErase, enabled = messages.isNotEmpty()) {
+                Text(if (isTe) "సేవ్ చేసిన చరిత్ర తొలగించు" else "Erase all saved history")
+            }
+        }
     }
 }
 
