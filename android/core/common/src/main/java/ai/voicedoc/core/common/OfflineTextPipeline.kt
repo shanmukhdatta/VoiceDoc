@@ -1,5 +1,7 @@
 package ai.voicedoc.core.common
 
+import kotlinx.coroutines.CancellationException
+
 /**
  * Testable pipeline boundary: every stage is offline and replaceable.
  * A production generator cannot be enabled without model + rights + safety validation.
@@ -32,7 +34,8 @@ class OfflineTextPipeline(
         }
         val hits = try {
             retriever.search(question, language, topK = 3)
-        } catch (_: Exception) {
+        } catch (error: Exception) {
+            if (error is CancellationException) throw error
             return unavailable(language)
         }
         if (hits.isEmpty()) return unavailable(language)
@@ -40,7 +43,8 @@ class OfflineTextPipeline(
         // Never call an untrusted model without bounded evidence and validated available assets.
         val draft = try {
             generator.generate(question, language, hits)
-        } catch (_: Exception) {
+        } catch (error: Exception) {
+            if (error is CancellationException) throw error
             return unavailable(language)
         }
         if (draft.language != language) return unavailable(language)
