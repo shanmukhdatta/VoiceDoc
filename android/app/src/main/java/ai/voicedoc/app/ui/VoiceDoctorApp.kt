@@ -29,7 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import ai.voicedoc.core.common.SupportedLanguage
 
-internal enum class Screen { HOME, CHAT, SOURCES, MODELS, SETTINGS, PRIVACY, HISTORY, DIAGNOSTICS, ABOUT }
+internal enum class Screen { HOME, CHAT, SOURCES, MODELS, SETTINGS, PRIVACY, HISTORY, DIAGNOSTICS, ABOUT, TTS_TEST }
 
 internal data class ChatMessage(val fromUser: Boolean, val message: String)
 
@@ -112,6 +112,7 @@ fun VoiceDoctorApp() {
                 Screen.PRIVACY -> PrivacyPage(isTe, onClear = { messages.clear() })
                 Screen.HISTORY -> HistoryPage(isTe)
                 Screen.DIAGNOSTICS -> DiagnosticsPage(isTe)
+                Screen.TTS_TEST -> OfflineVoiceTestPage(isTe)
                 Screen.ABOUT -> AboutPage(isTe)
             }
         }
@@ -137,4 +138,5 @@ private fun Screen.displayName(te: Boolean): String = when (this) {
     Screen.HISTORY -> if (te) "చరిత్ర" else "History"
     Screen.DIAGNOSTICS -> if (te) "పరీక్షలు" else "Diagnostics"
     Screen.ABOUT -> if (te) "గురించి" else "About"
+    Screen.TTS_TEST -> if (te) "వాయిస్ పరీక్ష" else "Voice test"
 }
