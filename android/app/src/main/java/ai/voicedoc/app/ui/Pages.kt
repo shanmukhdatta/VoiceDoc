@@ -1,5 +1,7 @@
 package ai.voicedoc.app.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +15,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import ai.voicedoc.app.speech.OnDeviceSpeechService
+import ai.voicedoc.core.common.SupportedLanguage
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
@@ -115,6 +124,23 @@ internal fun ChatPage(
     onMessagesChanged: () -> Unit
 ) {
     var input by rememberSaveable { mutableStateOf("") }
+    var speechStatus by rememberSaveable { mutableStateOf("") }
+    val context = LocalContext.current
+    val localSpeech = remember(context) {
+        OnDeviceSpeechService(
+            context = context,
+            onText = { transcript -> input = transcript.take(1000) },
+            onStatus = { status -> speechStatus = status }
+        )
+    }
+    DisposableEffect(localSpeech) { onDispose { localSpeech.stop() } }
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            localSpeech.start(if (isTe) SupportedLanguage.TELUGU else SupportedLanguage.ENGLISH)
+        } else {
+            speechStatus = "Microphone permission denied. Use typed input instead."
+        }
+    }
     fun submit() {
         val clean = input.trim()
         if (clean.isEmpty() || clean.length > 1000) return
@@ -158,10 +184,27 @@ internal fun ChatPage(
         OutlinedButton(onClick = { onClear(); onMessagesChanged() }, enabled = messages.isNotEmpty(), modifier = Modifier.fillMaxWidth()) {
             Text(if (isTe) "ఈ సెషన్ తొలగించు" else "Clear this session")
         }
-        Text(
-            if (isTe) "మైక్రోఫోన్ ఇంకా అందుబాటులో లేదు." else "Microphone input is not implemented yet.",
-            style = MaterialTheme.typography.labelMedium
-        )
+        if (localSpeech.available()) {
+            OutlinedButton(onClick = {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
+                    PackageManager.PERMISSION_GRANTED
+                ) {
+                    localSpeech.start(if (isTe) SupportedLanguage.TELUGU else SupportedLanguage.ENGLISH)
+                } else {
+                    permission.launch(Manifest.permission.RECORD_AUDIO)
+                }
+            }, modifier = Modifier.fillMaxWidth()) {
+                Text(if (isTe) "ఆఫ్‌లైన్ మాట్లాడే ఇన్‌పుట్" else "Try device-only speech input")
+            }
+            Text(if (isTe)
+                "మీరు పంపించే ముందే గుర్తించిన వాక్యాన్ని సమీక్షించండి."
+            else "Review the transcription before tapping Send. This is Android's device-only recognizer, not Whisper.")
+        } else {
+            Text(if (isTe)
+                "ఈ ఫోన్‌లో ఆఫ్‌లైన్ స్పీచ్ గుర్తింపు అందుబాటులో లేదు."
+            else "No device-only speech recognizer is installed. Use text input.")
+        }
+        if (speechStatus.isNotBlank()) Text(speechStatus, style = MaterialTheme.typography.labelMedium)
     }
 }
 
