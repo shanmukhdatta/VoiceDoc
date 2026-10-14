@@ -116,5 +116,6 @@ internal fun ExperimentalModelPage(isTe: Boolean) {
                 "The model is NOT connected to medical chat. Production health answers require approved knowledge, citations and clinician-reviewed safety evaluation.",
             style = MaterialTheme.typography.bodyMedium
         )
+        OnnxDiagnosticSection(isTe)
     }
 }
