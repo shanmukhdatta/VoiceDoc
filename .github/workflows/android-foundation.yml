@@ -5,6 +5,7 @@ on:
     branches:
       - "phase-*/**"
       - "integration/**"
+      - "baseline/**"
       - "main"
   pull_request:
     paths:
