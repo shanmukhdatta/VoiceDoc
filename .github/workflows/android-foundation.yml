@@ -3,7 +3,9 @@ name: Android Foundation CI
 on:
   push:
     branches:
-      - "phase-01/**"
+      - "phase-*/**"
+      - "integration/**"
+      - "main"
   pull_request:
     paths:
       - "android/**"
@@ -38,3 +40,12 @@ jobs:
             exit 1
           fi
           echo "Source manifest has no INTERNET declaration"
+
+      - name: Upload installable debug APK for prototype testing
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: voicedoctor-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
