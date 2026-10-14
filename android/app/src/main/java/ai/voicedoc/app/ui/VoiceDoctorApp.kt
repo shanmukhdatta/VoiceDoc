@@ -31,7 +31,7 @@ import ai.voicedoc.core.common.SupportedLanguage
 import ai.voicedoc.app.data.EncryptedHistoryStore
 import ai.voicedoc.app.data.SavedConversationTurn
 
-internal enum class Screen { HOME, CHAT, SOURCES, MODELS, SETTINGS, PRIVACY, HISTORY, DIAGNOSTICS, ABOUT, TTS_TEST }
+internal enum class Screen { HOME, CHAT, SOURCES, MODELS, SETTINGS, PRIVACY, HISTORY, DIAGNOSTICS, ABOUT, TTS_TEST, MIC_TEST }
 
 internal data class ChatMessage(val fromUser: Boolean, val message: String)
 
@@ -149,6 +149,7 @@ fun VoiceDoctorApp() {
                 Screen.HISTORY -> HistoryPage(isTe, historyEnabled, messages, onErase = { eraseHistory() })
                 Screen.DIAGNOSTICS -> DiagnosticsPage(isTe)
                 Screen.TTS_TEST -> OfflineVoiceTestPage(isTe)
+                Screen.MIC_TEST -> MicrophoneTestPage(isTe)
                 Screen.ABOUT -> AboutPage(isTe)
             }
         }
@@ -175,4 +176,5 @@ private fun Screen.displayName(te: Boolean): String = when (this) {
     Screen.DIAGNOSTICS -> if (te) "పరీక్షలు" else "Diagnostics"
     Screen.ABOUT -> if (te) "గురించి" else "About"
     Screen.TTS_TEST -> if (te) "వాయిస్ పరీక్ష" else "Voice test"
+    Screen.MIC_TEST -> if (te) "మైక్ పరీక్ష" else "Mic test"
 }

@@ -230,6 +230,9 @@ internal fun SettingsPage(
         OutlinedButton(onClick = { onNavigate(Screen.HISTORY) }, modifier = Modifier.fillMaxWidth()) {
             Text(if (isTe) "చరిత్ర వివరాలు" else "History details")
         }
+        OutlinedButton(onClick = { onNavigate(Screen.MIC_TEST) }, modifier = Modifier.fillMaxWidth()) {
+            Text(if (isTe) "మైక్రోఫోన్ పరీక్ష" else "Test microphone capture")
+        }
         OutlinedButton(onClick = { onNavigate(Screen.TTS_TEST) }, modifier = Modifier.fillMaxWidth()) {
             Text(if (isTe) "ఆఫ్‌లైన్ వాయిస్ పరీక్ష" else "Test offline voices")
         }
@@ -254,9 +257,9 @@ internal fun PrivacyPage(isTe: Boolean, historyEnabled: Boolean, onClear: () -> 
         Section(
             if (isTe) "ఈ బిల్డ్‌లో గోప్యత" else "Privacy in this build",
             if (isTe)
-                "INTERNET లేదా మైక్రోఫోన్ అనుమతులు లేవు. చరిత్రను అనుమతిస్తే Android Keystore ఆధారిత ఎన్‌క్రిప్షన్ ఉపయోగిస్తాము."
+                "ఇంటర్నెట్ అనుమతి లేదు. మైక్రోఫోన్‌కు మీ అనుమతి అవసరం. చరిత్రను అనుమతిస్తే Android Keystore ఆధారిత ఎన్‌క్రిప్షన్ ఉపయోగిస్తాము."
             else
-                "No INTERNET or microphone permission. Opt-in history uses Android Keystore-backed AES-GCM encryption and no-backup storage."
+                "No INTERNET permission. Microphone diagnostic requires your explicit permission. Opt-in history uses Android Keystore-backed AES-GCM encryption and no-backup storage."
         )
         Section(
             if (isTe) "ప్రస్తుతం చరిత్ర స్థితి" else "History consent status",
@@ -313,8 +316,8 @@ internal fun DiagnosticsPage(isTe: Boolean) {
         )
         Section(
             if (isTe) "అనుమతులు" else "Permissions",
-            if (isTe) "ఈ ఫౌండేషన్ బిల్డ్‌లో INTERNET/RECORD_AUDIO అనుమతులు లేవు."
-            else "Foundation build does not request INTERNET or RECORD_AUDIO."
+            if (isTe) "ఇంటర్నెట్ అనుమతి లేదు. మైక్రోఫోన్ అనుమతి అడిగిన తర్వాత మాత్రమే తీసుకుంటాము."
+            else "This build does not request INTERNET. RECORD_AUDIO is requested only for local microphone diagnostics."
         )
     }
 }
