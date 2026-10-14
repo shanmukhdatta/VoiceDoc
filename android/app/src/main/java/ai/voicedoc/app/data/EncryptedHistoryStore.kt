@@ -20,9 +20,10 @@ data class SavedConversationTurn(val fromUser: Boolean, val text: String)
  * Only invoke write() after explicit opt-in. No voice/audio ever persisted here.
  * This is an engineering implementation, not a substitute for device security review.
  */
-class EncryptedHistoryStore(context: Context) {
-    private val file = File(context.noBackupFilesDir, "conversation-history-v1.enc")
-    private val keyAlias = "ai.voicedoc.history.v1"
+class EncryptedHistoryStore(context: Context, namespace: String = "default") {
+    init { require(Regex("^[a-zA-Z0-9_-]{1,32}$").matches(namespace)) }
+    private val file = File(context.noBackupFilesDir, "conversation-history-v1-$namespace.enc")
+    private val keyAlias = "ai.voicedoc.history.v1.$namespace"
     private val maxTurns = 80
     private val maxTextLength = 1000
     private val magic = byteArrayOf(0x56, 0x44, 0x01)
