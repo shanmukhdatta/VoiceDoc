@@ -48,7 +48,7 @@ class LocalKnowledgeRetriever private constructor(
     }
 
     companion object {
-        private val wordPattern = Regex("[\\p{L}\\p{N}]+")
+        private val wordPattern = Regex("[\\p{L}\\p{M}\\p{N}]+")
         fun tokenize(text: String): List<String> {
             val normalized = Normalizer.normalize(text, Normalizer.Form.NFKC)
                 .lowercase(Locale.ROOT)
