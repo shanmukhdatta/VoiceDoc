@@ -2,6 +2,10 @@
 
 > **A privacy-first, multilingual, fully on-device health-information assistant for Android that accepts speech, retrieves relevant curated medical knowledge locally, runs a lightweight language model on the phone, and returns grounded text or speech without requiring an internet connection for inference.**
 
+## Hands-on implementation — student checklist
+
+**Build the entire planned offline Android AI system yourself, component by component:** [10-Day Implementation Plan & Master Checklist](IMPLEMENTATION_PLAN.md). The plan includes [Day 01](docs/implementation/DAY_01.md) through [Day 10](docs/implementation/DAY_10.md), each with learning, setup, mini-projects, real integration subtasks, experiments, tests and verification gates. Check a task only after the result is verified.
+
 ---
 
 ## 1. Project Vision
