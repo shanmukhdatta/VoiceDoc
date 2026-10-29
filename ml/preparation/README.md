@@ -23,6 +23,14 @@ python ml/preparation/model_manifest.py --manifest local-pack.json --root model-
 
 Use expected runtime/dimension flags matching the target app. This offline preflight verifies declared compatibility and bytes only. A self-authored JSON file cannot prove publisher authenticity, redistribution permission, clinical suitability, or that Android can load an artifact. The Android Models screen now imports generation packs for LiteRT-LM Android 0.18.0 when supplied an independently trusted manifest SHA-256. The importer verifies archive contents and file integrity but does not verify signatures or connect imported packs to medical chat. See [`models/README.md`](../../models/README.md).
 
+Build an importer-compatible ZIP from reviewed local assets with:
+
+```powershell
+python ml/preparation/build_model_pack.py --manifest model-assets/manifest.json --root model-assets --output outputs/approved-generation.zip --expected-runtime litert-lm-android --expected-runtime-version 0.18.0
+```
+
+The pack builder rechecks file hashes and declared runtime compatibility, then writes a deterministic ZIP without overwriting an existing output. It enforces the Android importer's manifest, per-file, and total expanded-size limits. It prints the SHA-256 of the exact `manifest.json` bytes; obtain and distribute that expected hash through an independently trusted publisher channel. The hash is an integrity check, not a digital signature or proof of publisher identity. The builder does not fetch, train, convert, sign, or clinically approve models.
+
 ### Device inference and fine-tuning
 `ml/training/train_qlora.py` provides the GPU training step after reviewed rows have been group-split. It requires local train/validation JSONL files, an already-present local causal LM checkpoint, and the exact publisher revision string. It rechecks review flags and scenario leakage, uses a 4-bit NF4 base with LoRA, masks prompt tokens from the loss, refuses silent answer truncation, evaluates each epoch, supports checkpoint resume, and records dataset hashes, hyperparameters and package versions. `--validate-only` checks the datasets/split without importing ML packages or starting training.
 

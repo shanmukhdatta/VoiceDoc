@@ -4,7 +4,7 @@
 **Recovery source:** `baseline/antigravity-qa` @ `8b3cc0006df508b979b0b62d9d41ffdcf7b630d0` (PR #21, open/draft).  
 **Mainline at initial audit:** `main` @ `d09525626eb16d7b0b795a405cbe4039b9ef13df`.  
 **Continuation branch:** `work/voicedoc-audit-hardening-20261029`.  
-**Latest verified implementation commit:** `d0564b0` (`fix: stabilize model pack instrumentation tests`). Local Android build, lint, static APK audit, and emulator instrumentation passed for this tree; GitHub Actions for this latest commit is pending. This is a prototype build checkpoint, not physical-device or clinical acceptance.
+**Latest verified implementation commit:** `d0564b0` (`fix: stabilize model pack instrumentation tests`). Local Android build, lint, static APK audit, and emulator instrumentation passed for this tree; GitHub Actions for this latest commit is pending. This is a prototype build checkpoint, not physical-device or clinical acceptance. The follow-up pack builder passed all eight preparation tests and the full local Python suite (29 tests) on 2026-10-29; CI for its commit is pending.
 
 ## Evidence rules
 
@@ -74,7 +74,7 @@ python -m unittest discover -p 'test_*.py' -v
 
 **Local verification at `d0564b0`:** The full Gradle command `:core:common:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug` passed. `:app:connectedDebugAndroidTest` passed all 12 tests on Android 14 Pixel_API_34. The app was installed and launched in the emulator (`ai.voicedoc.app/.MainActivity`). Static `scripts/audit_native_16k.py` passed on the resulting APK, checking 14 `.so` libraries. The debug prototype APK SHA-256 is `6e73d50f76520a95f81ba7522a0746addd72385305652ee9303eb7e012a276b0` (216,227,152 bytes). This emulator has no production medical models or approved corpus; its chat stays fail-closed.
 
-**Local Python tests in this continuation:** corpus ingestion 5 passed (including Windows temp cleanup); model preparation 5 passed (including versioned packs); QLoRA preflight 5 passed; evaluation 7 passed; native audit 4 passed (26 total). `git diff --check` passed. Initial offline Gradle attempts lacked uncached dependencies; after they resolved, the complete local Android build, lint, and emulator test suite passed as recorded below.
+**Local Python tests in this continuation:** corpus ingestion 5 passed (including Windows temp cleanup); model preparation 8 passed (including deterministic pack build and tamper refusal); QLoRA preflight 5 passed; evaluation 7 passed; native audit 4 passed (29 total). `git diff --check` passed. Initial offline Gradle attempts lacked uncached dependencies; after they resolved, the complete local Android build, lint, and emulator test suite passed as recorded below.
 
 **Still not run:** connected Android instrumentation, real ONNX/Gemma execution, whisper.cpp compilation, real model conversion, Kaggle training, corpus approval, phone inference, clinical evaluation.
 
@@ -105,5 +105,9 @@ For Kaggle, **do not assume an unverified notebook runs**. First select legally 
 - [ ] Build/run genuine offline ASR and bilingual speech/answer loop on ARM64.
 - [ ] Execute approved-data evaluation, convert/quantize actual models and check citations/urgency with qualified reviewers.
 - [ ] Document dependency/model/voice redistribution rights and sign/test a release candidate only after all acceptance gates.
+
+### Pack-builder follow-up
+
+`ml/preparation/build_model_pack.py` creates a deterministic, no-overwrite schema-v1 ZIP for local artifacts after checking runtime/version and asset hashes. It enforces the importer's 256 KiB manifest, 1.5 GB per-file and 2.5 GB expanded-size bounds. Its output manifest digest is integrity-only and must be obtained independently from a trusted publisher channel to authenticate a pack. Three synthetic fixture tests cover successful exact archive output, overwrite prevention and tamper/runtime mismatch refusal. All eight preparation tests, the full 29-test Python suite, CLI help, and `git diff --check` passed on 2026-10-29. Commit SHA and CI run are to be recorded after the change is pushed.
 
 This tracker should be updated after every implementation task with paths, actual checks, commit SHA and blockers; it is not a substitute for completing the ten-day plan.
