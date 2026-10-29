@@ -59,6 +59,9 @@ class LocalModelPackImporter(
             try {
                 copyArchive(uri, archiveFile)
                 val installed = inspectAndExtract(archiveFile, staging, expectedManifestSha256)
+                if (archiveFile.exists() && !archiveFile.delete()) {
+                    throw IOException("Could not remove staged model-pack archive")
+                }
                 val completed = File(root, "pack-${installed.id}-${installed.version}")
                 if (completed.exists()) throw IOException("This model-pack version is already installed")
                 if (!staging.renameTo(completed)) throw IOException("Could not atomically install model pack")
@@ -70,16 +73,16 @@ class LocalModelPackImporter(
             }
         }
 
-    fun installed(): List<InstalledModelPack> {
-        if (!root.isDirectory) return emptyList()
-        return root.listFiles().orEmpty().asSequence()
+    suspend fun installed(): List<InstalledModelPack> = withContext(Dispatchers.IO) {
+        if (!root.isDirectory) return@withContext emptyList()
+        root.listFiles().orEmpty().asSequence()
             .filter { it.isDirectory && it.name.matches(INSTALLED_DIR) }
             .mapNotNull { directory -> readInstalled(directory) }
             .sortedWith(compareBy<InstalledModelPack> { it.id }.thenBy { it.version })
             .toList()
     }
 
-    fun remove(id: String, version: String) {
+    suspend fun remove(id: String, version: String) = withContext(Dispatchers.IO) {
         require(PACK_ID.matches(id) && PACK_VERSION.matches(version))
         val directory = File(root, "pack-$id-$version")
         if (directory.exists() && !directory.deleteRecursively()) {
@@ -170,7 +173,6 @@ class LocalModelPackImporter(
                 }
             }
             File(staging, MANIFEST_NAME).writeBytes(manifestBytes)
-            archiveFile.delete()
             return pack.toInstalledPack(staging)
         }
     }
@@ -206,6 +208,7 @@ class LocalModelPackImporter(
         if (array.length() !in 1..MAX_ASSETS) throw IOException("Pack must declare between 1 and $MAX_ASSETS assets")
         val records = linkedMapOf<String, PackAssetRecord>()
         val paths = mutableSetOf<String>()
+        val assetIds = mutableSetOf<String>()
         for (index in 0 until array.length()) {
             val asset = array.optJSONObject(index) ?: throw IOException("Asset record must be an object")
             val role = asset.requiredString("role")
@@ -218,7 +221,9 @@ class LocalModelPackImporter(
             val reviewed = asset.opt("redistribution_reviewed") as? Boolean ?: false
             if (!reviewed) throw IOException("Each asset requires separate redistribution review")
             if (role !in ALLOWED_ROLES || records.containsKey(role)) throw IOException("Invalid or duplicate asset role")
-            if (!ASSET_ID.matches(assetId) || !paths.add(path)) throw IOException("Invalid or duplicate asset ID/path")
+            if (!ASSET_ID.matches(assetId) || !assetIds.add(assetId) || !paths.add(path)) {
+                throw IOException("Invalid or duplicate asset ID/path")
+            }
             validateRelativePath(path)
             if (path == MANIFEST_NAME) throw IOException("Asset path conflicts with manifest")
             if (format !in FORMATS || source.isBlank()) throw IOException("Invalid asset format or source")
@@ -359,6 +364,6 @@ class LocalModelPackImporter(
         val INSTALLED_DIR = Regex("^pack-[A-Za-z0-9][A-Za-z0-9._-]{0,63}-[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$")
         val PACK_KINDS = setOf("generation", "embedding", "speech", "knowledge")
         val ALLOWED_ROLES = setOf("model", "tokenizer", "vocabulary", "index", "config")
-        val FORMATS = setOf("litertlm", "onnx", "ggml", "gguf", "sqlite", "json", "bin")
+        val FORMATS = setOf("litertlm", "onnx", "ggml", "gguf", "sqlite", "bin")
     }
 }

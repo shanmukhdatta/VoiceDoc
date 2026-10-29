@@ -4,7 +4,7 @@
 **Recovery source:** `baseline/antigravity-qa` @ `8b3cc0006df508b979b0b62d9d41ffdcf7b630d0` (PR #21, open/draft).  
 **Mainline at initial audit:** `main` @ `d09525626eb16d7b0b795a405cbe4039b9ef13df`.  
 **Continuation branch:** `work/voicedoc-audit-hardening-20261029`.  
-**Latest verified implementation commit:** `67d587672eaf81d3386fd186ff005fbb6d718ed5`. Android and all Python CI workflows passed on this commit; this is a code/build checkpoint, not physical-device or clinical acceptance.
+**Latest verified implementation commit:** `ae11b3345dff94d90da0948f1219557955a57593`. Android and all Python CI workflows passed on this commit; this is a code/build checkpoint, not physical-device or clinical acceptance.
 
 ## Evidence rules
 
@@ -38,7 +38,7 @@
 | Urgent symptom escalation | `MedicalSafetyPolicy.kt`, fallback UI | Basic deterministic rules; no independent clinical performance testing | Partially implemented | Clinician-reviewed challenge evaluation and false-reassurance audit |
 | Android offline TTS | `DeviceOfflineTts.kt`, `OfflineVoiceTestPage.kt` | Platform offline voice selection path, no playback verified here | Requires device/GPU/data review | Airplane-mode English + Telugu availability/playback; do not assume Telugu installed |
 | Encrypted opt-in history | `EncryptedHistoryStore.kt`, `VoiceDoctorApp.kt` | AES-GCM Keystore source & instrumented test present, not executed here | Implemented but unverified | Test consent/restart/disable/delete including restore and failure handling |
-| Model asset integrity and pack preparation | `ModelAssetVerifier.kt`, `ml/preparation/model_manifest.py` | Schema-v1 multi-asset/runtime/language/embedding-dimension validator; five preparation tests pass locally and CI. Android production pack installer and publisher authentication remain absent | Partially implemented | Build importer around approved publisher metadata and test real assets |
+| Model asset integrity and pack preparation | `LocalModelPackImporter.kt`, `ModelAssetVerifier.kt`, `ml/preparation/model_manifest.py` | Android importer checks externally supplied manifest SHA, exact entries, paths, sizes, checksums and runtime declarations; installer tests added. Python schema validator has five tests. Android CI passed compile/build on `ae11b3345dff94d90da0948f1219557955a57593`; connected instrumentation is not executed | Partially implemented | Run instrumentation and test authorized model assets; the caller must obtain publisher hash through a trusted channel |
 | Python corpus/eval tools | `rag/ingestion/`, `ml/evaluation/`, `ml/preparation/` | All Python workflows passed on `67d587672eaf81d3386fd186ff005fbb6d718ed5`; local suites: 5 ingestion + 5 preparation + 7 evaluation + 4 native audit tests | Verified by executed tests | Replace only synthetic fixtures with approved evaluation data after review |
 | Kaggle training / real evaluation | No executed training outputs or approval data supplied | No GPU session or evaluation corpus in this environment | Requires device/GPU/data review | Curate splits; run reproducible LoRA/eval and export logs/checkpoints |
 | Quantization / LiteRT conversion | No verified conversion workflow for chosen current model on recovered branch | No model weights/conversion run here | Missing | Select supported model + official conversion path; publish checksums and conversion logs |
@@ -57,6 +57,7 @@
 7. Fixed the Windows corpus-builder test failure by closing SQLite connections, rejecting empty corpora, and building in unique staging databases before atomic publication. Added failure-cleanup and no-overwrite tests.
 8. Added a schema-v1 multi-file model-pack validator with declared runtime/version, languages, embedding dimension, required roles/formats, path/size/hash validation, and duplicate/empty-pack rejection. This is a preparation preflight, not an Android pack installer or publisher-authentication mechanism.
 9. Added a dormant bounded LiteRT-LM adapter to the shared structured generator interface. It uses the pinned API's max-output-token setting, disables tool calling and thinking, serializes access/lifecycle, and requires explicit source markers. The app default remains fail-closed; the adapter is not connected to production UI or approved assets.
+10. Added an Android schema-v1 model-pack importer to no-backup private storage, with independently supplied manifest SHA-256, runtime/version matching, required roles and formats, language/dimension checks, exact ZIP entry matching, bounded sizes, safe paths, per-file checksums, staging cleanup and atomic installation. Added a Models-screen workflow for LiteRT-LM 0.18.0 packs and removable installed-pack inventory. The installer tests cover valid install/list/remove, untrusted manifest hashes, path traversal and runtime mismatch; instrumentation execution remains pending.
 
 ### Commands genuinely run during this session
 
@@ -67,6 +68,8 @@ python -m unittest discover -p 'test_*.py' -v
 ```
 
 **CI evidence at verified implementation commit `67d587672eaf81d3386fd186ff005fbb6d718ed5`:** Android Foundation CI run `40863419589` passed `:core:common:testDebugUnitTest`, `:app:assembleDebug`, `:app:assembleDebugAndroidTest`, `:app:lintDebug`, merged APK permission inspection, and static 16 KiB audit (14 libraries). The corpus (`40863419418`), preparation (`40863419420`), and metrics (`40863419411`) workflows also passed. The debug APK artifact is attached to the Android run. The CI emitted toolchain deprecation notices for Gradle 8.13, `setup-java@v4`, and Node 20; no Android lint errors remained.
+
+**Latest pushed verification at `ae11b3345dff94d90da0948f1219557955a57593`:** Android workflow run `40864735121` passed compile/build/lint and static audits; corpus (`40864734856`), preparation (`40864734857`) and metrics (`40864734883`) workflows passed. A further Android instrumentation test file for the model-pack importer is being added after this checkpoint; its instrumented assertions have not yet run on an emulator/device.
 
 **Local tests in this continuation:** corpus ingestion 5 passed (including Windows temp cleanup); model preparation 5 passed (including versioned packs); evaluation 7 passed; native audit 4 passed. `git diff --check` passed. Local Gradle could not resolve uncached AARs/JARs because this environment reported network unreachable; GitHub Actions compiled and linted the implementation successfully.
 

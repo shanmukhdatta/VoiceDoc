@@ -12,8 +12,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,19 +27,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import ai.voicedoc.app.models.ExperimentalModelStore
 import ai.voicedoc.app.models.GemmaLiteRtDiagnostic
+import ai.voicedoc.app.models.LocalModelPackImporter
 import kotlinx.coroutines.launch
 
 @Composable
 internal fun ExperimentalModelPage(isTe: Boolean) {
     val context = LocalContext.current
     val store = remember(context) { ExperimentalModelStore(context) }
+    val packImporter = remember(context) { LocalModelPackImporter(context, "litertlm", "0.18.0") }
     val evaluator = remember { GemmaLiteRtDiagnostic() }
     val scope = rememberCoroutineScope()
     var revision by remember { mutableIntStateOf(0) }
     var busy by remember { mutableStateOf(false) }
     var information by remember { mutableStateOf("") }
+    var publisherManifestHash by remember { mutableStateOf("") }
     // Updates the view when a model was imported or removed.
     val file = remember(revision) { store.existing() }
+    var installedPacks by remember { mutableStateOf(emptyList<ai.voicedoc.app.models.InstalledModelPack>()) }
+    LaunchedEffect(revision) { installedPacks = packImporter.installed() }
     val selectModel = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null && !busy) {
             busy = true
@@ -109,6 +116,60 @@ internal fun ExperimentalModelPage(isTe: Boolean) {
             }) { Text(if (isTe) "మోడల్ ఫైల్ తొలగించు" else "Delete experimental model") }
         }
         if (information.isNotBlank()) Text(information)
+        Text(if (isTe) "ధృవీకరించిన మోడల్ ప్యాక్" else "Versioned model-pack import",
+            style = MaterialTheme.typography.titleMedium)
+        Text(if (isTe)
+            "LiteRT-LM 0.18.0 ప్యాక్ కోసం ప్రచురణకర్త నుండి స్వతంత్రంగా పొందిన manifest SHA-256 అవసరం."
+        else
+            "Imports a schema-v1 pack targeting LiteRT-LM 0.18.0. Enter the manifest SHA-256 obtained independently from the publisher; a hash written inside the archive is not trusted.")
+        OutlinedTextField(
+            value = publisherManifestHash,
+            onValueChange = { publisherManifestHash = it.filter { char -> char.isDigit() || char.lowercaseChar() in 'a'..'f' }.take(64) },
+            label = { Text("Publisher manifest SHA-256") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        val selectPack = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null && !busy) {
+                busy = true
+                scope.launch {
+                    try {
+                        val pack = packImporter.import(uri, publisherManifestHash)
+                        information = "Installed ${pack.id} ${pack.version} (${pack.assets.size} assets). Integrity and declared compatibility checked; publisher authenticity and clinical quality remain unverified."
+                        revision++
+                    } catch (e: Exception) {
+                        information = "Model-pack import failed: ${e.javaClass.simpleName} — ${e.message.orEmpty().take(150)}"
+                    } finally { busy = false }
+                }
+            }
+        }
+        OutlinedButton(
+            enabled = !busy && publisherManifestHash.length == 64,
+            onClick = { selectPack.launch(arrayOf("application/zip", "application/octet-stream", "*/*")) },
+            modifier = Modifier.fillMaxWidth()
+        ) { Text(if (isTe) "మోడల్ ప్యాక్ దిగుమతి" else "Import versioned model-pack ZIP") }
+        if (installedPacks.isEmpty()) {
+            Text(if (isTe) "ధృవీకరించిన ప్యాక్‌లు లేవు" else "No versioned model packs installed")
+        } else for (pack in installedPacks) {
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("${pack.id} ${pack.version} · ${pack.kind}", style = MaterialTheme.typography.titleSmall)
+                    Text("Runtime ${pack.runtimeName} ${pack.runtimeVersion} · ${pack.languages.sorted().joinToString()}")
+                    Text("Manifest SHA-256 ${pack.manifestSha256}", style = MaterialTheme.typography.bodySmall)
+                    OutlinedButton(enabled = !busy, onClick = {
+                        busy = true
+                        scope.launch {
+                            try {
+                                packImporter.remove(pack.id, pack.version)
+                                information = "Removed ${pack.id} ${pack.version}."
+                                revision++
+                            } catch (e: Exception) { information = "Removal failed: ${e.javaClass.simpleName}" }
+                            finally { busy = false }
+                        }
+                    }) { Text(if (isTe) "ప్యాక్ తొలగించు" else "Remove pack") }
+                }
+            }
+        }
         Text(
             if (isTe)
                 "ఈ పరీక్ష వైద్య చాట్‌కు అనుసంధానం కాలేదు. వాడుక కోసం వైద్య నిపుణుల సమీక్ష, ఆధారాలు, లైసెన్స్ ధృవీకరణ అవసరం."
