@@ -70,7 +70,7 @@ internal fun OnboardingPage(isTe: Boolean, onLanguage: (String) -> Unit, onProce
         Text("Voice Doctor AI", style = MaterialTheme.typography.headlineLarge)
         Text(
             if (isTe) "ఆఫ్‌లైన్ ఆరోగ్య సమాచార సహాయకం"
-            else "An offline health-information assistant",
+            else "Offline health-information prototype",
             style = MaterialTheme.typography.titleMedium
         )
         Text(if (isTe) "భాషను ఎంచుకోండి" else "Choose your language")
@@ -102,13 +102,13 @@ internal fun HomePage(isTe: Boolean, onNavigate: (Screen) -> Unit) {
         Text(if (isTe) "స్వాగతం" else "Welcome", style = MaterialTheme.typography.headlineMedium)
         Section(
             if (isTe) "ప్రస్తుతం అందుబాటులో ఉన్నవి" else "Available now",
-            if (isTe) "ఇంగ్లీష్/తెలుగు ఇంటర్‌ఫేస్, స్థానిక సెట్టింగ్స్, గోప్యత సమాచారం, టెక్స్ట్ ఇన్‌పుట్."
-            else "English/Telugu interface, local settings, privacy information, and text entry."
+            if (isTe) "ఇంగ్లీష్/తెలుగు ఇంటర్‌ఫేస్, టెక్స్ట్ చాట్, స్థానిక గోప్యత సెట్టింగ్స్. చాట్ ప్రస్తుతం భద్రతా సూచనలకే పరిమితం."
+            else "English/Telugu interface, typed chat, and local privacy settings. Chat currently provides safety guidance only."
         )
         Section(
-            if (isTe) "ఇంకా అందుబాటులో లేవు" else "Not available yet",
-            if (isTe) "ఆఫ్‌లైన్ స్పీచ్, ధృవీకరించిన వైద్య సమాచార శోధన, స్థానిక AI మోడల్, మరియు వాయిస్ అవుట్‌పుట్."
-            else "Offline speech, verified medical retrieval, on-device language model, and voice output."
+            if (isTe) "పరికరాన్ని బట్టి మారేవి" else "Device-dependent features",
+            if (isTe) "ఫోన్‌లో స్థానిక స్పీచ్ గుర్తింపు లేదా ఆఫ్‌లైన్ వాయిస్ అందుబాటులో ఉండవచ్చు. వైద్య సమాచార ప్యాక్ లేదా AI సమాధాన మోడల్ ఇంకా ఈ చాట్‌కు అనుసంధానించబడలేదు."
+            else "Your phone may provide device-only speech recognition or an offline voice. No reviewed medical knowledge pack or answer model is connected to chat yet."
         )
         Button(onClick = { onNavigate(Screen.CHAT) }, modifier = Modifier.fillMaxWidth()) {
             Text(if (isTe) "టెక్స్ట్ చాట్ తెరువు" else "Open text chat")
