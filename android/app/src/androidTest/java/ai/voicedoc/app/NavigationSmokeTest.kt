@@ -28,10 +28,10 @@ class NavigationSmokeTest {
             .commit()
         ActivityScenario.launch(MainActivity::class.java).use {
             compose.onNodeWithText("I understand — Continue").performClick()
-            compose.onNodeWithText("Open text chat").performClick()
+            compose.onNodeWithText("Ask a health question", substring = true).performClick()
             compose.onNode(hasSetTextAction()).performTextInput("Hello app")
             compose.onNodeWithText("Send").performClick()
-            compose.onNodeWithText("System").assertExists()
+            compose.onNodeWithText("Assistant").assertExists()
             compose.onNodeWithText(
                 "This development build does not have a verified medical knowledge pack",
                 substring = true

@@ -10,7 +10,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardActions
@@ -26,7 +34,9 @@ import ai.voicedoc.core.common.SupportedLanguage
 import ai.voicedoc.app.metrics.LocalDeviceMetrics
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -48,14 +58,14 @@ import ai.voicedoc.core.common.OfflineSafetyFallback
 @Composable
 private fun Page(content: @Composable () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
     ) { content() }
 }
 
 @Composable
 private fun Section(title: String, body: String) {
-    Card(Modifier.fillMaxWidth()) {
+    SoftCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Text(body, style = MaterialTheme.typography.bodyMedium)
@@ -66,8 +76,9 @@ private fun Section(title: String, body: String) {
 @Composable
 internal fun OnboardingPage(isTe: Boolean, onLanguage: (String) -> Unit, onProceed: () -> Unit) {
     Page {
-        Spacer(Modifier.height(16.dp))
-        Text("Voice Doctor AI", style = MaterialTheme.typography.headlineLarge)
+        Spacer(Modifier.height(10.dp))
+        AssistantOrb(size = 142.dp)
+        Text("Voice Doctor AI", style = MaterialTheme.typography.headlineLarge, color = VoiceDocColors.Forest)
         Text(
             if (isTe) "ఆఫ్‌లైన్ ఆరోగ్య సమాచార సహాయకం"
             else "Offline health-information prototype",
@@ -99,22 +110,68 @@ internal fun OnboardingPage(isTe: Boolean, onLanguage: (String) -> Unit, onProce
 @Composable
 internal fun HomePage(isTe: Boolean, onNavigate: (Screen) -> Unit) {
     Page {
-        Text(if (isTe) "స్వాగతం" else "Welcome", style = MaterialTheme.typography.headlineMedium)
-        Section(
-            if (isTe) "ప్రస్తుతం అందుబాటులో ఉన్నవి" else "Available now",
-            if (isTe) "ఇంగ్లీష్/తెలుగు ఇంటర్‌ఫేస్, టెక్స్ట్ చాట్, స్థానిక గోప్యత సెట్టింగ్స్. చాట్ ప్రస్తుతం భద్రతా సూచనలకే పరిమితం."
-            else "English/Telugu interface, typed chat, and local privacy settings. Chat currently provides safety guidance only."
-        )
-        Section(
-            if (isTe) "పరికరాన్ని బట్టి మారేవి" else "Device-dependent features",
-            if (isTe) "ఫోన్‌లో స్థానిక స్పీచ్ గుర్తింపు లేదా ఆఫ్‌లైన్ వాయిస్ అందుబాటులో ఉండవచ్చు. వైద్య సమాచార ప్యాక్ లేదా AI సమాధాన మోడల్ ఇంకా ఈ చాట్‌కు అనుసంధానించబడలేదు."
-            else "Your phone may provide device-only speech recognition or an offline voice. No reviewed medical knowledge pack or answer model is connected to chat yet."
-        )
-        Button(onClick = { onNavigate(Screen.CHAT) }, modifier = Modifier.fillMaxWidth()) {
-            Text(if (isTe) "టెక్స్ట్ చాట్ తెరువు" else "Open text chat")
+        SoftCard(Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .background(Brush.linearGradient(listOf(Color(0xFFF0FAF4), Color.White)))
+                    .padding(start = 20.dp, top = 24.dp, bottom = 22.dp, end = 12.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(if (isTe) "మీ ఆరోగ్య సహాయకుడు" else "YOUR PRIVATE HEALTH COMPANION", style = MaterialTheme.typography.labelMedium, color = VoiceDocColors.Green, fontWeight = FontWeight.Bold)
+                    Text(if (isTe) "నేను ఎలా\nసహాయపడగలను?" else "How can I\nhelp you today?", style = MaterialTheme.typography.headlineMedium, color = VoiceDocColors.Ink, fontWeight = FontWeight.SemiBold)
+                    Text(if (isTe) "మీ పరికరంలోనే. మీ నియంత్రణలో." else "On your device. In your control.", style = MaterialTheme.typography.bodySmall, color = VoiceDocColors.Muted)
+                }
+                AssistantOrb(size = 112.dp)
+            }
         }
-        OutlinedButton(onClick = { onNavigate(Screen.PRIVACY) }, modifier = Modifier.fillMaxWidth()) {
-            Text(if (isTe) "గోప్యత వివరాలు" else "Review privacy")
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            StatusPill(if (isTe) "స్థానిక గోప్యత" else "PRIVATE BY DESIGN")
+            StatusPill(if (isTe) "EN · TE" else "ENGLISH · TELUGU")
+        }
+        SoftCard(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Text(if (isTe) "ఈరోజు మీకు ఏమి కావాలి?" else "What would you like help with?", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Button(onClick = { onNavigate(Screen.CHAT) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
+                    Text(if (isTe) "✦   ఆరోగ్య ప్రశ్న అడగండి" else "✦   Ask a health question", modifier = Modifier.padding(vertical = 5.dp))
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    QuickActionCard("▤", if (isTe) "మూలాలు" else "Sources", Modifier.weight(1f)) { onNavigate(Screen.SOURCES) }
+                    QuickActionCard("◉", if (isTe) "మోడల్స్" else "Models", Modifier.weight(1f)) { onNavigate(Screen.MODELS) }
+                }
+            }
+        }
+        SoftCard(Modifier.fillMaxWidth()) {
+            Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = androidx.compose.ui.Alignment.Top) {
+                Text("i", color = VoiceDocColors.Forest, fontWeight = FontWeight.Bold, modifier = Modifier.size(28.dp).background(VoiceDocColors.Mint, RoundedCornerShape(10.dp)).padding(start = 10.dp, top = 3.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text(if (isTe) "పరిశోధనా ప్రోటోటైప్" else "Research prototype", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    Text(if (isTe) "వైద్య AI మోడల్ లేదా సమీక్షించిన జ్ఞాన ప్యాక్ ఈ బిల్డ్‌లో లేదు. చాట్ వైద్య సమాధానాలు ఇవ్వదు." else "Medical model and reviewed knowledge are not installed in this build. Chat does not provide medical answers.", style = MaterialTheme.typography.bodySmall, color = VoiceDocColors.Muted)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatusPill(text: String) {
+    Text(text, style = MaterialTheme.typography.labelSmall, color = VoiceDocColors.Forest, fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.background(VoiceDocColors.Mint, RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 8.dp))
+}
+
+@Composable
+private fun QuickActionCard(icon: String, title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    androidx.compose.material3.OutlinedCard(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.outlinedCardColors(containerColor = VoiceDocColors.PaleMint),
+        border = androidx.compose.foundation.BorderStroke(1.dp, VoiceDocColors.Line)
+    ) {
+        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(icon, color = VoiceDocColors.Forest, style = MaterialTheme.typography.titleLarge)
+            Text(title, color = VoiceDocColors.Ink, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -160,21 +217,40 @@ internal fun ChatPage(
         input = ""
     }
     Page {
-        Text(if (isTe) "టెక్స్ట్ చాట్" else "Text chat", style = MaterialTheme.typography.headlineSmall)
-        Section(
-            if (isTe) "భద్రతా స్థితి" else "Safety status",
-            if (isTe) "వైద్య జ్ఞాన ప్యాక్/AI ఇంకా అందుబాటులో లేదు. ఈ చాట్ వైద్య సమాధానాలు ఇవ్వదు."
-            else "Medical knowledge/model assets are unavailable. This chat does not provide medical answers."
-        )
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            AssistantOrb(size = 58.dp, listening = speechStatus.contains("Listening", ignoreCase = true))
+            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(if (isTe) "మీ సహాయకుడు" else "Your assistant", style = MaterialTheme.typography.headlineSmall, color = VoiceDocColors.Forest)
+                Text(if (isTe) "స్థానిక మరియు ప్రైవేట్" else "Private · on-device", style = MaterialTheme.typography.bodySmall, color = VoiceDocColors.Muted)
+            }
+        }
+        SoftCard(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(if (isTe) "ప్రోటోటైప్ స్థితి" else "Prototype status", style = MaterialTheme.typography.labelLarge, color = VoiceDocColors.Forest, fontWeight = FontWeight.SemiBold)
+                Text(if (isTe) "వైద్య మోడల్ లేదా సమీక్షించిన జ్ఞాన ప్యాక్ లేదు; చాట్ వైద్య సమాధానాలు ఇవ్వదు." else "No medical model or reviewed knowledge pack is installed. Chat does not provide medical answers.", style = MaterialTheme.typography.bodySmall, color = VoiceDocColors.Muted)
+            }
+        }
         for (message in messages) {
-            Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        if (message.fromUser) (if (isTe) "మీరు" else "You")
-                        else (if (isTe) "సిస్టమ్" else "System"),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    Text(message.message)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = if (message.fromUser) Arrangement.End else Arrangement.Start
+            ) {
+                Card(
+                    modifier = Modifier.widthIn(max = 320.dp),
+                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomEnd = if (message.fromUser) 6.dp else 20.dp, bottomStart = if (message.fromUser) 20.dp else 6.dp),
+                    colors = CardDefaults.cardColors(containerColor = if (message.fromUser) VoiceDocColors.Mint else VoiceDocColors.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                ) {
+                    Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            if (message.fromUser) (if (isTe) "మీరు" else "You")
+                            else (if (isTe) "సిస్టమ్" else "Assistant"),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = VoiceDocColors.Forest,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(message.message, color = VoiceDocColors.Ink)
+                    }
                 }
             }
         }
@@ -188,14 +264,15 @@ internal fun ChatPage(
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
             keyboardActions = KeyboardActions(onSend = { submit() })
         )
-        Button(onClick = { submit() }, enabled = input.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = { submit() }, enabled = input.isNotBlank(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
             Text(if (isTe) "పంపించు" else "Send")
         }
         OutlinedButton(onClick = { onClear(); onMessagesChanged() }, enabled = messages.isNotEmpty(), modifier = Modifier.fillMaxWidth()) {
             Text(if (isTe) "ఈ సెషన్ తొలగించు" else "Clear this session")
         }
         if (localSpeech.available()) {
-            OutlinedButton(onClick = {
+            Button(
+                onClick = {
                 if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
                     PackageManager.PERMISSION_GRANTED
                 ) {
@@ -203,8 +280,12 @@ internal fun ChatPage(
                 } else {
                     permission.launch(Manifest.permission.RECORD_AUDIO)
                 }
-            }, modifier = Modifier.fillMaxWidth()) {
-                Text(if (isTe) "ఆఫ్‌లైన్ మాట్లాడే ఇన్‌పుట్" else "Try device-only speech input")
+            },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = VoiceDocColors.Forest)
+            ) {
+                Text(if (isTe) "◉   ఆఫ్‌లైన్ మాట్లాడే ఇన్‌పుట్" else "◉   Speak to your assistant", modifier = Modifier.padding(vertical = 4.dp))
             }
             Text(if (isTe)
                 "మీరు పంపించే ముందే గుర్తించిన వాక్యాన్ని సమీక్షించండి."
@@ -214,7 +295,14 @@ internal fun ChatPage(
                 "ఈ ఫోన్‌లో ఆఫ్‌లైన్ స్పీచ్ గుర్తింపు అందుబాటులో లేదు."
             else "No device-only speech recognizer is installed. Use text input.")
         }
-        if (speechStatus.isNotBlank()) Text(speechStatus, style = MaterialTheme.typography.labelMedium)
+        if (speechStatus.isNotBlank()) {
+            SoftCard(Modifier.fillMaxWidth()) {
+                Row(Modifier.padding(12.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    AssistantOrb(size = 40.dp, listening = speechStatus.contains("Listening", ignoreCase = true))
+                    Text(speechStatus, style = MaterialTheme.typography.labelMedium, color = VoiceDocColors.Forest)
+                }
+            }
+        }
         val lastSystem = messages.lastOrNull { !it.fromUser }?.message
         if (lastSystem != null && voiceChoice != null) {
             OutlinedButton(onClick = {

@@ -16,8 +16,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -90,9 +93,15 @@ fun VoiceDoctorApp() {
 
     val tabs = listOf(Screen.HOME, Screen.CHAT, Screen.SOURCES, Screen.MODELS, Screen.SETTINGS)
     Scaffold(
+        containerColor = VoiceDocColors.Canvas,
         topBar = {
             TopAppBar(
                 title = { Text(if (route == Screen.HOME) "Voice Doctor AI" else route.displayName(isTe)) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = VoiceDocColors.Canvas,
+                    titleContentColor = VoiceDocColors.Ink,
+                    navigationIconContentColor = VoiceDocColors.Forest
+                ),
                 navigationIcon = {
                     if (route !in tabs || route != Screen.HOME) {
                         TextButton(onClick = { navigate(Screen.HOME) }) {
@@ -103,26 +112,38 @@ fun VoiceDoctorApp() {
             )
         },
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = VoiceDocColors.White,
+                contentColor = VoiceDocColors.Muted,
+                tonalElevation = 0.dp
+            ) {
                 for (tab in tabs) {
                     NavigationBarItem(
                         selected = route == tab,
                         onClick = { navigate(tab) },
                         icon = { Text(tab.iconText()) },
                         label = { Text(tab.displayName(isTe)) },
-                        alwaysShowLabel = true
+                        alwaysShowLabel = true,
+                        colors = androidx.compose.material3.NavigationBarItemDefaults.colors(
+                            selectedIconColor = VoiceDocColors.Forest,
+                            selectedTextColor = VoiceDocColors.Forest,
+                            indicatorColor = VoiceDocColors.Mint,
+                            unselectedIconColor = VoiceDocColors.Muted,
+                            unselectedTextColor = VoiceDocColors.Muted
+                        )
                     )
                 }
             }
         }
     ) { inner ->
         Column(modifier = Modifier.fillMaxSize().padding(inner)) {
-            when (route) {
-                Screen.HOME -> HomePage(isTe, onNavigate = ::navigate)
-                Screen.CHAT -> ChatPage(isTe, messages, onClear = { messages.clear() }, onMessagesChanged = { saveHistory() })
-                Screen.SOURCES -> SourcesPage(isTe)
-                Screen.MODELS -> ModelsPage(isTe)
-                Screen.SETTINGS -> SettingsPage(
+            Crossfade(targetState = route, animationSpec = tween(250), label = "screen-transition") { visibleRoute ->
+                when (visibleRoute) {
+                    Screen.HOME -> HomePage(isTe, onNavigate = ::navigate)
+                    Screen.CHAT -> ChatPage(isTe, messages, onClear = { messages.clear() }, onMessagesChanged = { saveHistory() })
+                    Screen.SOURCES -> SourcesPage(isTe)
+                    Screen.MODELS -> ModelsPage(isTe)
+                    Screen.SETTINGS -> SettingsPage(
                     isTe, onLanguage = ::chooseLanguage,
                     onNavigate = ::navigate,
                     historyEnabled = historyEnabled,
@@ -144,13 +165,14 @@ fun VoiceDoctorApp() {
                         accepted = false
                         navigate(Screen.HOME)
                     }
-                )
-                Screen.PRIVACY -> PrivacyPage(isTe, historyEnabled, onClear = { messages.clear(); saveHistory() })
-                Screen.HISTORY -> HistoryPage(isTe, historyEnabled, messages, onErase = { eraseHistory() })
-                Screen.DIAGNOSTICS -> DiagnosticsPage(isTe)
-                Screen.TTS_TEST -> OfflineVoiceTestPage(isTe)
-                Screen.MIC_TEST -> MicrophoneTestPage(isTe)
-                Screen.ABOUT -> AboutPage(isTe)
+                    )
+                    Screen.PRIVACY -> PrivacyPage(isTe, historyEnabled, onClear = { messages.clear(); saveHistory() })
+                    Screen.HISTORY -> HistoryPage(isTe, historyEnabled, messages, onErase = { eraseHistory() })
+                    Screen.DIAGNOSTICS -> DiagnosticsPage(isTe)
+                    Screen.TTS_TEST -> OfflineVoiceTestPage(isTe)
+                    Screen.MIC_TEST -> MicrophoneTestPage(isTe)
+                    Screen.ABOUT -> AboutPage(isTe)
+                }
             }
         }
     }
@@ -158,10 +180,10 @@ fun VoiceDoctorApp() {
 
 private fun Screen.iconText(): String = when (this) {
     Screen.HOME -> "⌂"
-    Screen.CHAT -> "✎"
-    Screen.SOURCES -> "≡"
-    Screen.MODELS -> "◇"
-    Screen.SETTINGS -> "⚙"
+    Screen.CHAT -> "✦"
+    Screen.SOURCES -> "▤"
+    Screen.MODELS -> "◉"
+    Screen.SETTINGS -> "⋯"
     else -> "•"
 }
 
