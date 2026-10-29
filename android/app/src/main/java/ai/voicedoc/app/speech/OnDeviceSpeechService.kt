@@ -61,7 +61,7 @@ class OnDeviceSpeechService(
                 override fun onPartialResults(partialResults: Bundle?) {}
                 override fun onEvent(eventType: Int, params: Bundle?) {}
             })
-            val locale = if (language == SupportedLanguage.TELUGU) Locale("te", "IN") else Locale.US
+            val locale = if (language == SupportedLanguage.TELUGU) Locale.forLanguageTag("te-IN") else Locale.US
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, locale.toLanguageTag())
