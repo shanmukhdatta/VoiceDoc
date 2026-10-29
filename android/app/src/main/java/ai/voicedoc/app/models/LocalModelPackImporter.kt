@@ -230,6 +230,7 @@ class LocalModelPackImporter(
             validateRelativePath(path)
             if (path == MANIFEST_NAME) throw IOException("Asset path conflicts with manifest")
             if (format !in FORMATS || source.isBlank()) throw IOException("Invalid asset format or source")
+            if (!hasCompatibleSuffix(path, format)) throw IOException("Asset filename conflicts with declared format")
             val bytes = asset.optLong("bytes", -1L)
             val sha = asset.optString("sha256", "")
             if (bytes !in 1..MAX_ASSET_BYTES || !SHA256.matches(sha)) throw IOException("Invalid size or SHA-256 for $role")
@@ -274,6 +275,18 @@ class LocalModelPackImporter(
         if (path.isBlank() || path.length > 240 || path.startsWith('/') || path.contains('\\') ||
             path.contains(':') || path.split('/').any { it.isBlank() || it == "." || it == ".." }) {
             throw IOException("Unsafe model-pack path")
+        }
+    }
+
+    private fun hasCompatibleSuffix(path: String, format: String): Boolean {
+        val lower = path.lowercase()
+        return when (format) {
+            "litertlm" -> lower.endsWith(".litertlm")
+            "onnx" -> lower.endsWith(".onnx")
+            "ggml" -> lower.endsWith(".ggml") || lower.endsWith(".bin")
+            "gguf" -> lower.endsWith(".gguf")
+            "sqlite" -> lower.endsWith(".sqlite") || lower.endsWith(".sqlite3") || lower.endsWith(".db")
+            else -> true
         }
     }
 

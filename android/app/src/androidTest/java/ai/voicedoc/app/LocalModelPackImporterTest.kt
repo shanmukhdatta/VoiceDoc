@@ -91,6 +91,17 @@ class LocalModelPackImporterTest {
         assertTrue(importer.installed().isEmpty())
     }
 
+    @Test fun rejectsFileExtensionThatConflictsWithDeclaredFormat() = runBlocking {
+        val model = byteArrayOf(1, 2, 3)
+        val manifest = manifest(model, path = "assets/model.sqlite")
+        writeArchive(manifest, model, assetPath = "assets/model.sqlite")
+        val failure = runCatching {
+            importer.import(Uri.fromFile(archive), sha256(manifest))
+        }.exceptionOrNull()
+        assertTrue(failure is IOException)
+        assertTrue(importer.installed().isEmpty())
+    }
+
     private fun manifest(
         model: ByteArray,
         path: String = "assets/model.ggml",
