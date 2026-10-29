@@ -42,7 +42,7 @@ class LocalKnowledgePack(private val context: Context, private val namespace: St
     suspend fun installFromDocument(uri: Uri): ImportedKnowledgePack = withContext(Dispatchers.IO) {
         if (available()) throw IOException("Remove the existing pack before importing another.")
         directory.mkdirs()
-        val temp = File(directory, "importing.tmp")
+        val temp = File.createTempFile("import-", ".sqlite", directory)
         val hash = MessageDigest.getInstance("SHA-256")
         var bytes = 0L
         try {
@@ -63,6 +63,7 @@ class LocalKnowledgePack(private val context: Context, private val namespace: St
             }
             if (bytes < 512) throw IOException("SQLite file is too small")
             val inspected = validateSchema(temp)
+            if (target.exists()) throw IOException("Another import already installed a pack")
             if (!temp.renameTo(target)) throw IOException("Unable to finish corpus import")
             ImportedKnowledgePack(
                 bytes, hash.digest().joinToString("") { "%02x".format(it) },
@@ -76,6 +77,14 @@ class LocalKnowledgePack(private val context: Context, private val namespace: St
 
     private fun validateSchema(file: File): Pair<Int, Int> {
         SQLiteDatabase.openDatabase(file.absolutePath, null, SQLiteDatabase.OPEN_READONLY).use { database ->
+            database.rawQuery("PRAGMA quick_check(1)", null).use { cursor ->
+                if (!cursor.moveToFirst() || cursor.getString(0) != "ok") {
+                    throw IOException("SQLite knowledge file failed integrity check")
+                }
+            }
+            database.rawQuery("PRAGMA foreign_key_check", null).use { cursor ->
+                if (cursor.moveToFirst()) throw IOException("Knowledge file violates foreign keys")
+            }
             database.rawQuery(
                 "SELECT source_id,title,publisher,license,language,reviewed_by FROM sources LIMIT 1", null
             ).use { it.moveToFirst() }
@@ -93,11 +102,30 @@ class LocalKnowledgePack(private val context: Context, private val namespace: St
                 throw IOException("Knowledge pack has invalid source/chunk counts")
             }
             database.rawQuery(
-                "SELECT COUNT(*) FROM sources WHERE title='' OR publisher='' OR license='' OR reviewed_by='' OR language NOT IN ('en','te')",
-                null
+                """
+                SELECT COUNT(*) FROM sources
+                WHERE source_id IS NULL OR trim(source_id)=''
+                OR title IS NULL OR trim(title)=''
+                OR publisher IS NULL OR trim(publisher)=''
+                OR license IS NULL OR trim(license)=''
+                OR reviewed_by IS NULL OR trim(reviewed_by)=''
+                OR sha256 IS NULL OR length(sha256)<>64
+                OR language IS NULL OR language NOT IN ('en','te')
+                """.trimIndent(), null
             ).use { cursor ->
                 cursor.moveToFirst()
-                if (cursor.getInt(0) != 0) throw IOException("Missing provenance metadata")
+                if (cursor.getInt(0) != 0) throw IOException("Missing or invalid source provenance")
+            }
+            database.rawQuery(
+                """
+                SELECT COUNT(*) FROM chunks c LEFT JOIN sources s ON c.source_id=s.source_id
+                WHERE s.source_id IS NULL OR c.chunk_id IS NULL OR trim(c.chunk_id)=''
+                OR c.language IS NULL OR c.language<>s.language
+                OR c.content IS NULL OR trim(c.content)=''
+                """.trimIndent(), null
+            ).use { cursor ->
+                cursor.moveToFirst()
+                if (cursor.getInt(0) != 0) throw IOException("Invalid/orphaned knowledge chunks")
             }
             return sources to chunks
         }
