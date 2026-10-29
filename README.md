@@ -1,5 +1,10 @@
 # Voice Doctor AI
 
+> **Current initial-release language scope: English and Telugu only.** Mentions of Tamil below describe possible future research, NOT a feature in this release.
+>
+> **Implementation status (October 29, 2026):** The recovered development baseline contains a Compose UI, experimental LiteRT-LM and ONNX tensor adapters, an Android on-device-only speech input path, developer corpus browsing, and opt-in encrypted history. **It does not provide a validated medical RAG/SLM conversation.** Full Whisper integration, approved bilingual medical corpus, matching E5 text tokenizer, clinical evaluation, physical-device acceptance, and reliable Telugu offline TTS remain open. See the [evidence-based completion tracker](docs/CODE_COMPLETION_TRACKER.md) and [10-day project plan](IMPLEMENTATION_PLAN.md). General health information only; never a diagnosis or treatment service.
+
+
 > **A privacy-first, multilingual, fully on-device health-information assistant for Android that accepts speech, retrieves relevant curated medical knowledge locally, runs a lightweight language model on the phone, and returns grounded text or speech without requiring an internet connection for inference.**
 
 ## Hands-on implementation — student checklist
