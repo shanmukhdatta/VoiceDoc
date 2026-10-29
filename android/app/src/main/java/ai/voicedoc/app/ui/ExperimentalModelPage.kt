@@ -34,7 +34,9 @@ import kotlinx.coroutines.launch
 internal fun ExperimentalModelPage(isTe: Boolean) {
     val context = LocalContext.current
     val store = remember(context) { ExperimentalModelStore(context) }
-    val packImporter = remember(context) { LocalModelPackImporter(context, "litertlm", "0.18.0") }
+    val packImporter = remember(context) {
+        LocalModelPackImporter(context, "litertlm", "0.18.0", expectedKind = "generation")
+    }
     val evaluator = remember { GemmaLiteRtDiagnostic() }
     val scope = rememberCoroutineScope()
     var revision by remember { mutableIntStateOf(0) }

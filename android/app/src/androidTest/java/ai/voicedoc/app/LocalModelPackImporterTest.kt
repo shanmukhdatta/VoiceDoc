@@ -20,7 +20,9 @@ import java.util.zip.ZipOutputStream
 @RunWith(AndroidJUnit4::class)
 class LocalModelPackImporterTest {
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
-    private val importer get() = LocalModelPackImporter(context, "test-runtime", "1.0")
+    private val importer get() = LocalModelPackImporter(
+        context, "test-runtime", "1.0", expectedKind = "speech"
+    )
     private val archive = File(context.cacheDir, "model-pack-import-test.zip")
 
     @After fun cleanup() = runBlocking {
@@ -78,14 +80,30 @@ class LocalModelPackImporterTest {
         assertTrue(importer.installed().isEmpty())
     }
 
-    private fun manifest(model: ByteArray, path: String = "assets/model.ggml", runtime: String = "test-runtime"): ByteArray {
+    @Test fun rejectsWrongPackKind() = runBlocking {
+        val model = byteArrayOf(1, 2, 3)
+        val manifest = manifest(model, kind = "knowledge")
+        writeArchive(manifest, model)
+        val failure = runCatching {
+            importer.import(Uri.fromFile(archive), sha256(manifest))
+        }.exceptionOrNull()
+        assertTrue(failure is IOException)
+        assertTrue(importer.installed().isEmpty())
+    }
+
+    private fun manifest(
+        model: ByteArray,
+        path: String = "assets/model.ggml",
+        runtime: String = "test-runtime",
+        kind: String = "speech"
+    ): ByteArray {
         val assetHash = sha256(model)
         return """
             {
               "schema_version": 1,
               "pack_id": "import-fixture",
               "version": "1.0",
-              "kind": "speech",
+              "kind": "$kind",
               "runtime": {"name": "$runtime", "version": "1.0"},
               "languages": ["en"],
               "assets": [{

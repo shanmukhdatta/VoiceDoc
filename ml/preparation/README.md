@@ -21,7 +21,7 @@ This exports `encoder.onnx`, tokenizer files, and gold reference token IDs/masks
 python ml/preparation/model_manifest.py --manifest local-pack.json --root model-assets/ --expected-runtime onnxruntime-android --expected-runtime-version 1.30.0 --expected-embedding-dimension 384
 ```
 
-Use expected runtime/dimension flags matching the target app. This offline preflight verifies declared compatibility and bytes only. A self-authored JSON file cannot prove publisher authenticity, redistribution permission, clinical suitability, or that Android can load an artifact. The Android app still lacks a production versioned-pack installer; the current model picker is explicitly experimental.
+Use expected runtime/dimension flags matching the target app. This offline preflight verifies declared compatibility and bytes only. A self-authored JSON file cannot prove publisher authenticity, redistribution permission, clinical suitability, or that Android can load an artifact. The Android Models screen now imports generation packs for LiteRT-LM Android 0.18.0 when supplied an independently trusted manifest SHA-256. The importer verifies archive contents and file integrity but does not verify signatures or connect imported packs to medical chat. See [`models/README.md`](../../models/README.md).
 
 ### Device inference and fine-tuning
 Gemma 3 1B IT quantization and LiteRT-LM packaging must follow the official supported toolchain for the chosen exact revision; converting arbitrary LoRA adapters directly into `.litertlm` is not guaranteed. Heavy Kaggle training starts only with reviewed and legally usable corpora and a defined baseline comparison. No training has been performed, no accuracy is asserted.

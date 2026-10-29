@@ -37,7 +37,8 @@ class LocalModelPackImporter(
     context: Context,
     private val runtimeName: String,
     private val runtimeVersion: String,
-    private val expectedEmbeddingDimension: Int? = null
+    private val expectedEmbeddingDimension: Int? = null,
+    private val expectedKind: String? = null
 ) {
     private val root = File(context.noBackupFilesDir, "model-packs")
     private val resolver = context.applicationContext.contentResolver
@@ -45,6 +46,7 @@ class LocalModelPackImporter(
     init {
         require(runtimeName.isNotBlank() && runtimeVersion.isNotBlank())
         require(expectedEmbeddingDimension == null || expectedEmbeddingDimension > 0)
+        require(expectedKind == null || expectedKind in PACK_KINDS)
     }
 
     suspend fun import(uri: Uri, expectedManifestSha256: String): InstalledModelPack =
@@ -187,6 +189,7 @@ class LocalModelPackImporter(
         val kind = json.requiredString("kind")
         if (!PACK_ID.matches(id) || !PACK_VERSION.matches(version)) throw IOException("Unsafe pack identity")
         if (kind !in PACK_KINDS) throw IOException("Unsupported model-pack kind")
+        if (expectedKind != null && kind != expectedKind) throw IOException("Unexpected model-pack kind")
 
         val runtime = json.optJSONObject("runtime") ?: throw IOException("Runtime declaration missing")
         if (runtime.requiredString("name") != runtimeName || runtime.requiredString("version") != runtimeVersion) {
