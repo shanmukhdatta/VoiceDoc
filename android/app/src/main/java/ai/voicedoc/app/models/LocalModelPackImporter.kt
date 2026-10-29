@@ -149,7 +149,8 @@ class LocalModelPackImporter(
                 expandedBytes += entry.size
                 if (expandedBytes > MAX_EXPANDED_BYTES) throw IOException("Expanded model pack exceeds size limit")
                 val target = containedFile(staging, relativePath)
-                if (!target.parentFile.exists() && !target.parentFile.mkdirs()) {
+                val parent = target.parentFile ?: throw IOException("Asset has no parent directory")
+                if (!parent.exists() && !parent.mkdirs()) {
                     throw IOException("Cannot create asset directory")
                 }
                 val hash = MessageDigest.getInstance("SHA-256")

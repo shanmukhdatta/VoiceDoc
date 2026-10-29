@@ -25,8 +25,8 @@ class LocalModelPackImporterTest {
     )
     private val archive = File(context.cacheDir, "model-pack-import-test.zip")
 
-    @After fun cleanup() = runBlocking {
-        importer.remove("import-fixture", "1.0")
+    @After fun cleanup() {
+        runBlocking { importer.remove("import-fixture", "1.0") }
         archive.delete()
     }
 
