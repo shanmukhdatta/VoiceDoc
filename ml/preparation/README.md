@@ -24,7 +24,19 @@ python ml/preparation/model_manifest.py --manifest local-pack.json --root model-
 Use expected runtime/dimension flags matching the target app. This offline preflight verifies declared compatibility and bytes only. A self-authored JSON file cannot prove publisher authenticity, redistribution permission, clinical suitability, or that Android can load an artifact. The Android Models screen now imports generation packs for LiteRT-LM Android 0.18.0 when supplied an independently trusted manifest SHA-256. The importer verifies archive contents and file integrity but does not verify signatures or connect imported packs to medical chat. See [`models/README.md`](../../models/README.md).
 
 ### Device inference and fine-tuning
-Gemma 3 1B IT quantization and LiteRT-LM packaging must follow the official supported toolchain for the chosen exact revision; converting arbitrary LoRA adapters directly into `.litertlm` is not guaranteed. Heavy Kaggle training starts only with reviewed and legally usable corpora and a defined baseline comparison. No training has been performed, no accuracy is asserted.
+`ml/training/train_qlora.py` provides the GPU training step after reviewed rows have been group-split. It requires local train/validation JSONL files, an already-present local causal LM checkpoint, and the exact publisher revision string. It rechecks review flags and scenario leakage, uses a 4-bit NF4 base with LoRA, masks prompt tokens from the loss, refuses silent answer truncation, evaluates each epoch, supports checkpoint resume, and records dataset hashes, hyperparameters and package versions. `--validate-only` checks the datasets/split without importing ML packages or starting training.
+
+Example on a CUDA-enabled Kaggle notebook after placing the approved data and model in local notebook storage:
+
+```bash
+python -m pip install -r ml/training/requirements-kaggle.txt
+python ml/preparation/prepare_reviewed_sft.py --input /kaggle/input/approved/data.jsonl --output-dir /kaggle/working/splits --seed 42
+python ml/training/train_qlora.py --train-jsonl /kaggle/working/splits/train.jsonl --validation-jsonl /kaggle/working/splits/validation.jsonl --base-model-dir /kaggle/input/approved-model --base-model-revision PUBLISHER_REVISION --output-dir /kaggle/working/voicedoc-qlora --max-seq-len 2048 --epochs 2
+```
+
+Kaggle's installed CUDA PyTorch build is intentionally not replaced by the requirements file; check its compatibility with the selected Kaggle image and record the emitted package versions. Keep private credentials out of notebooks and logs. The resulting PEFT adapter is **not** a merged model, LiteRT-LM artifact, or deployable Android pack. No training has been performed, no accuracy is asserted, and adapter output cannot be used for health answers before clinical evaluation and a supported conversion path.
+
+Gemma 3 1B IT quantization and LiteRT-LM packaging must follow the official supported toolchain for the chosen exact revision; converting arbitrary LoRA adapters directly into `.litertlm` is not guaranteed. Training remains dependent on reviewed/licensed corpus and model access. No training has been performed, no accuracy is asserted.
 
 References:
 - https://huggingface.co/intfloat/multilingual-e5-small
