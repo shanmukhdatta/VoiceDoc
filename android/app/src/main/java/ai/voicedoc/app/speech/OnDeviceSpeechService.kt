@@ -26,6 +26,10 @@ class OnDeviceSpeechService(
         Build.VERSION.SDK_INT >= 31 && SpeechRecognizer.isOnDeviceRecognitionAvailable(context)
 
     fun start(language: SupportedLanguage) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            onStatus("On-device recognition requires Android 12 or newer.")
+            return
+        }
         if (!available()) {
             onStatus("On-device recognition is not available on this phone.")
             return
