@@ -158,6 +158,26 @@ internal fun ExperimentalModelPage(isTe: Boolean) {
                     Text("${pack.id} ${pack.version} · ${pack.kind}", style = MaterialTheme.typography.titleSmall)
                     Text("Runtime ${pack.runtimeName} ${pack.runtimeVersion} · ${pack.languages.sorted().joinToString()}")
                     Text("Manifest SHA-256 ${pack.manifestSha256}", style = MaterialTheme.typography.bodySmall)
+                    val packagedModel = pack.asset("model")
+                    if (pack.kind == "generation") {
+                        Button(
+                            enabled = !busy && packagedModel?.isFile == true && store.deviceSupportsArm64(),
+                            onClick = {
+                                busy = true
+                                scope.launch {
+                                    information = try {
+                                        evaluator.runFixedBenchmark(packagedModel!!)
+                                    } catch (e: Exception) {
+                                        "Pack model smoke test failed: ${e.javaClass.simpleName} — ${e.message.orEmpty().take(150)}"
+                                    } finally { busy = false }
+                                }
+                            }
+                        ) { Text(if (isTe) "స్థానిక మోడల్ పరీక్ష" else "Run benign local model smoke test") }
+                        if (!store.deviceSupportsArm64()) {
+                            Text("LiteRT-LM CPU smoke test requires an ARM64 Android device.")
+                        }
+                        Text("This uses a fixed non-medical prompt. It does not connect the pack to health chat or validate medical quality.")
+                    }
                     OutlinedButton(enabled = !busy, onClick = {
                         busy = true
                         scope.launch {

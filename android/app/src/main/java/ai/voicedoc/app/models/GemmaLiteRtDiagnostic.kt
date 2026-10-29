@@ -14,7 +14,7 @@ import java.io.File
  */
 class GemmaLiteRtDiagnostic {
     suspend fun runFixedBenchmark(candidate: File): String = withContext(Dispatchers.IO) {
-        require(candidate.isFile && candidate.extension == "litertlm")
+        require(candidate.isFile && candidate.extension.equals("litertlm", ignoreCase = true))
         val started = System.nanoTime()
         Engine(EngineConfig(modelPath = candidate.absolutePath, backend = Backend.CPU())).use { engine ->
             engine.initialize()

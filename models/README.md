@@ -10,6 +10,6 @@ The Models screen currently accepts schema-v1 **generation** ZIP packs for LiteR
 
 Before import, obtain the SHA-256 of the exact `manifest.json` from an independently trusted publisher channel. Enter that digest in the app. The importer verifies the supplied digest, declared compatibility, paths, sizes, ZIP contents, and asset hashes, then installs atomically in app-private no-backup storage. It rejects repeat installs of the same pack ID/version; remove the prior pack before replacing it. The current digest field is a developer trust input: the app does not verify publisher signatures or fetch trusted metadata itself.
 
-Integrity and compatibility checks do not establish publisher authenticity, redistribution rights, tokenizer equivalence, model quality, or clinical safety. Imported generation packs are **not connected to medical chat**. Do not treat a successful import as model-load or clinical validation.
+Integrity and compatibility checks do not establish publisher authenticity, redistribution rights, tokenizer equivalence, model quality, or clinical safety. On an ARM64 Android phone, the Models screen offers only a fixed, non-medical LiteRT-LM smoke test. Imported generation packs are **not connected to medical chat**. A successful import is not a successful model-load; a successful smoke test is not clinical validation.
 
 Gemma 3 1B weights are subject to Gemma terms. No model files are committed or included in the APK.
