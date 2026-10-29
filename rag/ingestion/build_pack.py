@@ -9,7 +9,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sqlite3
+import tempfile
 from pathlib import Path
 
 REQUIRED = {
@@ -43,6 +45,8 @@ def build(input_file: Path, output_file: Path) -> dict:
     entries = json.loads(input_file.read_text(encoding="utf-8"))
     if not isinstance(entries, list):
         raise ValueError("input must be a list of sources")
+    if not entries:
+        raise ValueError("refusing to build an empty knowledge pack")
     if output_file.exists():
         raise FileExistsError("refusing to overwrite an existing indexed corpus")
     if output_file.resolve() == input_file.resolve():
@@ -57,7 +61,12 @@ def build(input_file: Path, output_file: Path) -> dict:
         ids.add(source["source_id"])
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
-    connection = sqlite3.connect(output_file)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{output_file.name}.", suffix=".staging", dir=output_file.parent
+    )
+    os.close(descriptor)
+    staging_file = Path(temporary_name)
+    connection = sqlite3.connect(staging_file)
     try:
         connection.executescript("""
             PRAGMA foreign_keys = ON;
@@ -97,9 +106,22 @@ def build(input_file: Path, output_file: Path) -> dict:
         connection.commit()
     except BaseException:
         connection.close()
-        output_file.unlink(missing_ok=True)
+        staging_file.unlink(missing_ok=True)
         raise
-    connection.close()
+    else:
+        connection.close()
+
+    # Hard-link publication is atomic and fails if another process created the target.
+    # Staging is in the same directory, so it stays on the same filesystem.
+    try:
+        os.link(staging_file, output_file)
+    except FileExistsError:
+        staging_file.unlink(missing_ok=True)
+        raise FileExistsError("refusing to overwrite an existing indexed corpus")
+    except OSError:
+        staging_file.unlink(missing_ok=True)
+        raise
+    staging_file.unlink()
     digest = hashlib.sha256(output_file.read_bytes()).hexdigest()
     return {"source_count": len(entries), "sha256": digest, "bytes": output_file.stat().st_size}
 

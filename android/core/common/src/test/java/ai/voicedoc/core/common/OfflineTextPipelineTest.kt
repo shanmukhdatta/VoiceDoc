@@ -17,7 +17,8 @@ class OfflineTextPipelineTest {
     private fun fake(answer: DraftGroundedAnswer): StructuredLocalGenerator =
         object : StructuredLocalGenerator {
             override suspend fun generate(
-                userQuestion: String, language: SupportedLanguage, evidence: List<KnowledgeHit>
+                userQuestion: String, language: SupportedLanguage, evidence: List<KnowledgeHit>,
+                maxNewTokens: Int
             ) = answer
         }
 
@@ -55,5 +56,33 @@ class OfflineTextPipelineTest {
         assertTrue(result is TextPipelineOutcome.EvidencedAnswer)
         result as TextPipelineOutcome.EvidencedAnswer
         assertEquals("synthetic", result.citations.first().sourceId)
+    }
+
+    @Test fun generationBudgetIsPassedToTheGenerator() = runBlocking {
+        var received = 0
+        val generator = object : StructuredLocalGenerator {
+            override suspend fun generate(
+                userQuestion: String, language: SupportedLanguage, evidence: List<KnowledgeHit>,
+                maxNewTokens: Int
+            ): DraftGroundedAnswer {
+                received = maxNewTokens
+                return DraftGroundedAnswer("Synthetic answer", language, setOf("synthetic"))
+            }
+        }
+        OfflineTextPipeline(retrieval(evidence), generator, maxNewTokens = 72)
+            .answer("Explain a concept", en)
+        assertEquals(72, received)
+    }
+
+    @Test fun groundedParserExtractsOnlyExplicitMarkersAndLeavesUnknownIdsForGate() {
+        val parsed = GroundedAnswerParser.parse(
+            "A cautious answer. [source:approved-1] [source:invented]", en
+        )
+        assertEquals("A cautious answer.", parsed.text)
+        assertEquals(setOf("approved-1", "invented"), parsed.citedSourceIds)
+        assertTrue(GroundedAnswerParser.parse("No source marker", en).citedSourceIds.isEmpty())
+        assertTrue(EvidenceOutputGate.check(parsed, evidence).let { it is OutputSafetyResult.Rejected })
+        val known = GroundedAnswerParser.parse("A cautious answer. [source:synthetic]", en)
+        assertTrue(EvidenceOutputGate.check(known, evidence) is OutputSafetyResult.Accepted)
     }
 }

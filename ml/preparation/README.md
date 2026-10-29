@@ -14,10 +14,14 @@ Install model-specific Python packages in a disposable isolated environment (tor
 
 This exports `encoder.onnx`, tokenizer files, and gold reference token IDs/masks/vector values, which must match Android ONNX execution. **ONNX graph export has not been executed in ChatGPT CI**, because weights/heavy libraries are absent. Android E5 free-text tokenization still requires a matching SentencePiece/Tokenizer backend, so don't call dense Telugu retrieval production-ready.
 
-### Artifact verification
-`python ml/preparation/model_manifest.py --manifest local-manifest.json --root model-assets/`
+### Versioned artifact packs
+`model_manifest.py` accepts a schema-v1 pack object with pack ID/version/kind, exact runtime name/version, English/Telugu declarations, optional embedding dimension, and per-file role/path/format/size/SHA/source/revision/license metadata. Generation packs require a LiteRT-LM model and tokenizer; embedding packs require an ONNX model and tokenizer; speech packs require a model; knowledge packs require a SQLite index. Paths must stay under the pack root, all declared file bytes are checked, and duplicate roles/IDs/paths are rejected.
 
-Requires expected publisher hash, size, exact pinned revision, language tags, format and independently authorized redistribution. Integrity and right-to-use checks remain separate; user-provided JSON approval booleans do not make a model legal.
+```powershell
+python ml/preparation/model_manifest.py --manifest local-pack.json --root model-assets/ --expected-runtime onnxruntime-android --expected-runtime-version 1.30.0 --expected-embedding-dimension 384
+```
+
+Use expected runtime/dimension flags matching the target app. This offline preflight verifies declared compatibility and bytes only. A self-authored JSON file cannot prove publisher authenticity, redistribution permission, clinical suitability, or that Android can load an artifact. The Android app still lacks a production versioned-pack installer; the current model picker is explicitly experimental.
 
 ### Device inference and fine-tuning
 Gemma 3 1B IT quantization and LiteRT-LM packaging must follow the official supported toolchain for the chosen exact revision; converting arbitrary LoRA adapters directly into `.litertlm` is not guaranteed. Heavy Kaggle training starts only with reviewed and legally usable corpora and a defined baseline comparison. No training has been performed, no accuracy is asserted.
