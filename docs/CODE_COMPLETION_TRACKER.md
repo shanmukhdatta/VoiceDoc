@@ -3,7 +3,8 @@
 **Audit date:** 2026-10-29 (IST)  
 **Recovery source:** `baseline/antigravity-qa` @ `8b3cc0006df508b979b0b62d9d41ffdcf7b630d0` (PR #21, open/draft).  
 **Mainline at initial audit:** `main` @ `d09525626eb16d7b0b795a405cbe4039b9ef13df`.  
-**Continuation branch:** `work/voicedoc-audit-hardening-20261029`.
+**Continuation branch:** `work/voicedoc-audit-hardening-20261029`.  
+**Latest Android implementation commit under validation:** `3bf1e6b0800b73afa328d3fc2e7efa57b286410d` (API guard + non-deprecated locale); see CI evidence below.
 
 ## Evidence rules
 
@@ -24,7 +25,7 @@
 | Backup & transfer exclusions | Manifest plus `res/xml/{backup_rules,data_extraction_rules}.xml` | Added this session, no Android lint/build available locally | Implemented but unverified | Run `lintDebug` and verify backup/restore behavior |
 | 16 KiB native page compatibility | `scripts/audit_native_16k.py`, `android-foundation.yml` | 4 synthetic Python audit tests PASSED locally; no APK/real AAR tested | Blocked — packaged library alignment unknown | Build APK; run audit, replace/rebuild any `.so` with PT_LOAD align below 16 KiB; test on 16 KiB device |
 | On-device microphone capture | `LocalPcmRecorder.kt`, `MicrophoneTestPage.kt` | Source exists; microphone not available here | Requires device/GPU/data review | Verify permission/cancel/restart/audio lifecycle |
-| Speech recognition and editable transcription | `OnDeviceSpeechService.kt`, `Pages.kt` | Android system on-device recognizer wired; no installed voice pack in this environment | Requires device/GPU/data review | Test English/Telugu offline transcription and correction on phone |
+| Android speech API compatibility guard | `android/app/src/main/java/ai/voicedoc/app/speech/OnDeviceSpeechService.kt` | Android CI at `3bf1e6b0800b73afa328d3fc2e7efa57b286410d` passed `:app:lintDebug`; API <31 returns before Android 12-only factory, no network recognizer fallback | Verified by executed tests | Physical test for Android 12+ recognizer availability and API 29–30 graceful status remains |\n| Speech recognition and editable transcription | `OnDeviceSpeechService.kt`, `Pages.kt` | Android system on-device recognizer wired; transcript remains user-editable and is not auto-submitted; no installed voice pack in CI | Requires physical device/GPU/data review | Test English/Telugu offline transcription and correction on phone |
 | whisper.cpp dedicated ASR | No JNI / bundled Whisper adapter located on recovered branch | No JNI build executed here | Missing | Implement model import, native runtime, lifecycle, PCM and real-device parity before enabling |
 | Language normalization & VAD | `LanguageAndVad.kt`; ONNX Silero adapter | Source exists, real model not exercised | Partially implemented | Verify normalized Telugu/English text, VAD vs labeled audio |
 | Medical RAG source governance | `rag/ingestion/build_pack.py`; `LocalKnowledgePack.kt` | Source inspected; import integrity/metadata/orphan checks extended | Partially implemented | Assemble *independently* licensed and professionally reviewed source documents |
@@ -50,7 +51,7 @@
 2. Hardened developer SQLite imports: unique staging file, SQLite quick/foreign-key checks, source provenance and cross-source chunk validation. Added an instrumented orphan-chunk rejection test (device execution pending).
 3. Added a pure-Python APK native ELF/ZIP 16 KiB page alignment audit with four synthetic fixture tests. Updated Android CI to test, build, lint, upload a debug APK and then fail visibly on incompatible bundled native libraries.
 4. Restored the ten-day plan and day-by-day instructions from `main` without changing their checkboxes.
-5. Updated README to distinguish experimental runtime adapters from an operational medical RAG system.
+5. Updated README to distinguish experimental runtime adapters from an operational medical RAG system.\n6. Added an explicit Android API 31 guard before `createOnDeviceSpeechRecognizer`; API 29–30 now report unavailable without invoking that API or selecting a network-capable recognizer. Replaced the deprecated Telugu `Locale(String, String)` constructor with `Locale.forLanguageTag`. CI verification is listed below.
 
 ### Commands genuinely run during this session
 
@@ -60,7 +61,7 @@ python -m unittest discover -p 'test_*.py' -v
 4 tests ran; OK (synthetic native ELF/APK fixtures)
 ```
 
-**Not run:** Gradle build/lint, Kotlin JVM tests, Android instrumentation, ONNX/Gemma execution, whisper.cpp compilation, real conversion, Kaggle training, corpus approval, phone inference, clinical evaluation. GitHub Actions results must be checked separately.
+**New CI evidence at implementation commit `3bf1e6b0800b73afa328d3fc2e7efa57b286410d`:** Android Foundation CI completed successfully (workflow run `40859802360`); `:core:common:testDebugUnitTest`, `:app:assembleDebug`, `:app:assembleDebugAndroidTest` and `:app:lintDebug` passed. Compiled APK permission inspection found only RECORD_AUDIO plus AndroidX's dynamic receiver permission; INTERNET and ACCESS_NETWORK_STATE are absent. Static 16 KiB ELF/APK audit checked 14 native libraries and passed. The debug APK artifact was uploaded (run `40859802360`). This is static packaging evidence, not a 16 KiB device test.\n\n**Still not run:** connected Android instrumentation, ONNX/Gemma execution, whisper.cpp compilation, real conversion, Kaggle training, corpus approval, phone inference, clinical evaluation.
 
 ## Windows / Antigravity next validation
 
@@ -82,7 +83,7 @@ For Kaggle, **do not assume an unverified notebook runs**. First select legally 
 
 ## Next engineering checkpoints
 
-- [ ] Resolve actual 16 KiB ELF findings from an assembled APK instead of suppressing warnings.
+- [x] Resolve actual 16 KiB ELF findings from an assembled APK: static audit passed for 14 `.so` files at implementation commit `3bf1e6b0800b73afa328d3fc2e7efa57b286410d`; physical 16 KiB Android device verification remains open.
 - [ ] Validate Android changes on CI/emulator and fix failures, recording run links and artifact hash.
 - [ ] Build and verify a compatible offline, versioned model-pack loader and E5 tokenizer.
 - [ ] Connect reviewed local evidence to bounded on-device generation and source IDs.
