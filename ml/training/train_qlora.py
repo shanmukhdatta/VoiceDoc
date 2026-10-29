@@ -121,6 +121,7 @@ def train(args: argparse.Namespace, train_rows: list[dict], validation_rows: lis
         from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
         from torch.utils.data import Dataset
         from transformers import (
+            AutoConfig,
             AutoModelForCausalLM,
             AutoTokenizer,
             BitsAndBytesConfig,
@@ -143,6 +144,15 @@ def train(args: argparse.Namespace, train_rows: list[dict], validation_rows: lis
     tokenizer = AutoTokenizer.from_pretrained(
         args.base_model_dir, local_files_only=True, trust_remote_code=False
     )
+    config = AutoConfig.from_pretrained(
+        args.base_model_dir, local_files_only=True, trust_remote_code=False
+    )
+    position_limit = getattr(config, "max_position_embeddings", None)
+    padded_limit = ((args.max_seq_len + args.pad_to_multiple_of - 1) // args.pad_to_multiple_of) * args.pad_to_multiple_of
+    if isinstance(position_limit, int) and padded_limit > position_limit:
+        raise ValueError(
+            f"Padded sequence length {padded_limit} exceeds checkpoint limit {position_limit}"
+        )
     if not getattr(tokenizer, "chat_template", None):
         raise ValueError("Base tokenizer has no chat template; do not invent a model prompt format")
     if tokenizer.pad_token_id is None:
@@ -161,8 +171,7 @@ def train(args: argparse.Namespace, train_rows: list[dict], validation_rows: lis
     class PadAndMask:
         def __call__(self, features):
             length = max(len(item["input_ids"]) for item in features)
-            if args.pad_to_multiple_of:
-                length = ((length + args.pad_to_multiple_of - 1) // args.pad_to_multiple_of) * args.pad_to_multiple_of
+            length = ((length + args.pad_to_multiple_of - 1) // args.pad_to_multiple_of) * args.pad_to_multiple_of
             input_ids, attention_mask, labels = [], [], []
             for item in features:
                 pad = length - len(item["input_ids"])
@@ -184,6 +193,7 @@ def train(args: argparse.Namespace, train_rows: list[dict], validation_rows: lis
     )
     model = AutoModelForCausalLM.from_pretrained(
         args.base_model_dir,
+        config=config,
         local_files_only=True,
         trust_remote_code=False,
         device_map="auto",
@@ -198,7 +208,7 @@ def train(args: argparse.Namespace, train_rows: list[dict], validation_rows: lis
         lora_dropout=args.lora_dropout,
         bias="none",
         task_type="CAUSAL_LM",
-        target_modules=args.target_modules.split(","),
+        target_modules=[module.strip() for module in args.target_modules.split(",") if module.strip()],
     ))
 
     training_args = TrainingArguments(
@@ -256,6 +266,7 @@ def main() -> None:
                         help="Exact publisher/model revision recorded for this local checkpoint")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--max-seq-len", type=int, default=2048)
+    parser.add_argument("--pad-to-multiple-of", type=int, default=8)
     parser.add_argument("--epochs", type=float, default=2.0)
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument("--eval-batch-size", type=int, default=1)
@@ -272,8 +283,15 @@ def main() -> None:
     args = parser.parse_args()
     if args.max_seq_len < 128 or args.max_seq_len > 8192:
         parser.error("--max-seq-len must be between 128 and 8192")
+    if args.pad_to_multiple_of < 1 or args.pad_to_multiple_of > 64:
+        parser.error("--pad-to-multiple-of must be between 1 and 64")
     if args.epochs <= 0 or args.batch_size < 1 or args.eval_batch_size < 1 or args.gradient_accumulation < 1:
         parser.error("Training duration and batch sizes must be positive")
+    if args.learning_rate <= 0 or args.lora_rank < 1 or args.lora_alpha < 1 or not 0 <= args.lora_dropout < 1:
+        parser.error("Learning rate/rank/alpha must be positive and LoRA dropout must be in [0, 1)")
+    target_modules = [module.strip() for module in args.target_modules.split(",") if module.strip()]
+    if not target_modules or len(target_modules) != len(set(target_modules)):
+        parser.error("--target-modules must be a non-empty comma-separated list without duplicates")
     train_rows = load_reviewed_jsonl(args.train_jsonl)
     validation_rows = load_reviewed_jsonl(args.validation_jsonl)
     check_splits(train_rows, validation_rows)
@@ -301,7 +319,7 @@ def main() -> None:
         "learning_rate": args.learning_rate,
         "lora_rank": args.lora_rank,
         "lora_alpha": args.lora_alpha,
-        "target_modules": args.target_modules.split(","),
+        "target_modules": target_modules,
         "system_prompt": SYSTEM_PROMPT,
         "git_revision": git_revision(),
         "python": platform.python_version(),
