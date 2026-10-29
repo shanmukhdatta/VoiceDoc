@@ -46,6 +46,25 @@ class LocalModelPackImporterTest {
         assertTrue(importer.installed().isEmpty())
     }
 
+    @Test fun refusesReplacementAndHidesCorruptedInstalledAssets() = runBlocking {
+        val model = "synthetic-model-asset".toByteArray()
+        val manifest = manifest(model)
+        writeArchive(manifest, model)
+        importer.import(Uri.fromFile(archive), sha256(manifest))
+
+        val duplicate = runCatching {
+            importer.import(Uri.fromFile(archive), sha256(manifest))
+        }.exceptionOrNull()
+        assertTrue("Same ID/version must not overwrite an installed pack", duplicate is IOException)
+        assertEquals(1, importer.installed().size)
+
+        val installedModel = File(
+            context.noBackupFilesDir, "model-packs/pack-import-fixture-1.0/assets/model.ggml"
+        )
+        installedModel.writeBytes("tampered".toByteArray())
+        assertTrue("A pack with a corrupted asset must not be listed as usable", importer.installed().isEmpty())
+    }
+
     @Test fun rejectsUntrustedManifestHashAndCleansStaging() = runBlocking {
         val model = byteArrayOf(1, 2, 3)
         val manifest = manifest(model)
