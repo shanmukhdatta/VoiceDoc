@@ -6,10 +6,13 @@ on:
       - "phase-*/**"
       - "integration/**"
       - "baseline/**"
+      - "work/**"
       - "main"
   pull_request:
     paths:
       - "android/**"
+      - "scripts/audit_native_16k.py"
+      - "scripts/test_audit_native_16k.py"
       - ".github/workflows/android-foundation.yml"
   workflow_dispatch:
 
@@ -32,14 +35,15 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Verify Gradle version
         run: ./gradlew --version
+      - name: Run native-audit unit tests (synthetic fixtures)
+        run: python3 -m unittest discover -s ../scripts -p 'test_audit_native_16k.py' -v
       - name: Unit tests and build debug APK
-        run: ./gradlew :core:common:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest --stacktrace
+        run: ./gradlew :core:common:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug --stacktrace
       - name: Check source manifest explicitly removes network permissions
         run: |
           grep -q 'android.permission.INTERNET" tools:node="remove"' app/src/main/AndroidManifest.xml
           grep -q 'android.permission.ACCESS_NETWORK_STATE" tools:node="remove"' app/src/main/AndroidManifest.xml
           echo "Explicit network-permission removals are present; compiled APK audit is authoritative."
-
       - name: Verify final APK does not request network access
         run: |
           AAPT="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name aapt | sort -V | tail -1)"
@@ -51,12 +55,14 @@ jobs:
           if grep -Eq 'android.permission.(INTERNET|ACCESS_NETWORK_STATE)' "$RUNNER_TEMP/voicedoc-apk-permissions.txt"; then
             echo "Merged APK unexpectedly requests a network permission"; exit 1
           fi
-
-      - name: Upload installable debug APK for prototype testing
-        if: success()
+      - name: Upload debug APK for device QA (not a release)
         uses: actions/upload-artifact@v4
         with:
           name: voicedoctor-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 7
+      # This intentionally fails if a dependency ships incompatible ELF segments.
+      # Zip packaging settings cannot correct a third-party .so p_align value.
+      - name: Audit ELF and APK ZIP alignment for 16 KiB page-size devices
+        run: python3 ../scripts/audit_native_16k.py app/build/outputs/apk/debug/app-debug.apk
