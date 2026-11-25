@@ -1,0 +1,21 @@
+name: Offline Knowledge Pack Tests
+
+on:
+  pull_request:
+    paths:
+      - "rag/**"
+      - ".github/workflows/offline-knowledge-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  corpus-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m unittest discover -s rag/ingestion -p "test_*.py" -v

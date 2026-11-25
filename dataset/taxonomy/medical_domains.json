@@ -1,0 +1,17 @@
+{
+  "hygiene": {"title": "General health and hygiene", "seed_topic": "Food safety", "expansion": ["handwashing", "safe food storage", "oral hygiene", "safe water"]},
+  "illness": {"title": "Common illnesses and infections", "seed_topic": "Common cold", "expansion": ["influenza", "foodborne infection", "fever context", "contagion misconceptions"]},
+  "respiratory": {"title": "Respiratory health", "seed_topic": "Asthma", "expansion": ["asthma triggers", "inhaler roles", "wheezing", "persistent cough", "breathing difficulty"]},
+  "digestive": {"title": "Digestive health", "seed_topic": "Constipation", "expansion": ["bowel habits", "acid reflux", "diarrhea", "abdominal pain context"]},
+  "skin": {"title": "Skin health", "seed_topic": "Eczema", "expansion": ["contact irritants", "acne", "sunburn", "rash onset and distribution"]},
+  "nutrition": {"title": "Nutrition and hydration", "seed_topic": "Dehydration", "expansion": ["hydration in heat", "fluid loss", "dietary fiber", "reading nutrition labels"]},
+  "diabetes": {"title": "Diabetes and metabolic health", "seed_topic": "Type 2 diabetes", "expansion": ["glucose terminology", "prediabetes", "insulin resistance", "hypoglycemia escalation"]},
+  "cardio": {"title": "Cardiovascular health", "seed_topic": "High blood pressure", "expansion": ["blood pressure monitoring", "cholesterol", "heart attack warning signs", "measurement uncertainty"]},
+  "musculoskeletal": {"title": "Musculoskeletal health", "seed_topic": "Back pain", "expansion": ["acute versus chronic pain", "post-injury pain", "arthritis", "tendon discomfort"]},
+  "mental": {"title": "Mental health", "seed_topic": "Anxiety", "expansion": ["stress", "persistent anxiety", "sleep disturbance", "seeking mental health care"]},
+  "first_aid": {"title": "First aid and injuries", "seed_topic": "Sprains and strains", "expansion": ["wounds", "burns", "falls", "suspected fractures", "escalation for severe bleeding"]},
+  "medication": {"title": "Medication awareness", "seed_topic": "Antibiotics", "expansion": ["drug labels", "antibiotic resistance", "side effects", "medication reconciliation", "safe storage"]},
+  "maternal": {"title": "Maternal and child health", "seed_topic": "Prenatal care", "expansion": ["checkup scheduling", "postpartum follow-up", "infant feeding information", "pediatric warning signs"]},
+  "prevention": {"title": "Preventive healthcare", "seed_topic": "Vaccines", "expansion": ["vaccine formats", "screening", "annual checkups", "context-specific immunization records"]},
+  "emergency": {"title": "Emergency symptoms and escalation", "seed_topic": "Stroke", "expansion": ["suspected stroke", "chest pain with red flags", "anaphylaxis", "loss of consciousness"]}
+}

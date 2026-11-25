@@ -1,0 +1,264 @@
+{
+  "approved": {
+    "rag": 0,
+    "sft": 0
+  },
+  "deduplication": {
+    "rag_text": {
+      "exact_groups": 0,
+      "near_pairs": 0
+    },
+    "sft_prompt": {
+      "exact_groups": 0,
+      "near_pairs": 0
+    },
+    "sft_response": {
+      "exact_groups": 0,
+      "near_pairs": 0
+    }
+  },
+  "rag": {
+    "count": 1520,
+    "distributions": {
+      "domain": {
+        "cardio": 144,
+        "diabetes": 96,
+        "digestive": 102,
+        "emergency": 17,
+        "first_aid": 109,
+        "hygiene": 41,
+        "illness": 252,
+        "maternal": 260,
+        "medication": 43,
+        "mental": 101,
+        "musculoskeletal": 81,
+        "nutrition": 44,
+        "prevention": 89,
+        "respiratory": 81,
+        "skin": 60
+      },
+      "language": {
+        "en": 1500,
+        "te": 20
+      }
+    },
+    "language_targets": {
+      "en": 1500,
+      "te": 1500
+    },
+    "remaining": 1480,
+    "remaining_by_language": {
+      "en": 0,
+      "te": 1480
+    },
+    "target": 3000
+  },
+  "review_queue": 1600,
+  "sft": {
+    "capability_targets": {
+      "clarify": 1500,
+      "emergency": 1500,
+      "general": 2500,
+      "grounded": 1500,
+      "multi": 1000,
+      "symptom": 2000
+    },
+    "count": 80,
+    "distributions": {
+      "capability": {
+        "clarify": 13,
+        "emergency": 10,
+        "general": 22,
+        "grounded": 16,
+        "multi": 9,
+        "symptom": 10
+      },
+      "domain": {
+        "cardio": 4,
+        "diabetes": 4,
+        "digestive": 4,
+        "emergency": 12,
+        "first_aid": 8,
+        "hygiene": 4,
+        "illness": 8,
+        "maternal": 4,
+        "medication": 4,
+        "mental": 4,
+        "musculoskeletal": 4,
+        "nutrition": 4,
+        "prevention": 8,
+        "respiratory": 4,
+        "skin": 4
+      },
+      "language": {
+        "en": 40,
+        "te": 40
+      },
+      "language_style": {
+        "code": 7,
+        "english": 40,
+        "telugu": 27,
+        "translit": 6
+      },
+      "risk_level": {
+        "high": 10,
+        "low": 46,
+        "moderate": 24
+      }
+    },
+    "remaining": 9920,
+    "remaining_by_capability": {
+      "clarify": 1487,
+      "emergency": 1490,
+      "general": 2478,
+      "grounded": 1484,
+      "multi": 991,
+      "symptom": 1990
+    },
+    "remaining_by_style": {
+      "code": 743,
+      "english": 4960,
+      "telugu": 3473,
+      "translit": 744
+    },
+    "style_targets": {
+      "code": 750,
+      "english": 5000,
+      "telugu": 3500,
+      "translit": 750
+    },
+    "target": 10000
+  },
+  "splits": {
+    "test": {
+      "count": 8,
+      "distributions": {
+        "capability": {
+          "emergency": 1,
+          "general": 3,
+          "grounded": 2,
+          "multi": 1,
+          "symptom": 1
+        },
+        "domain": {
+          "medication": 4,
+          "respiratory": 4
+        },
+        "language": {
+          "en": 4,
+          "te": 4
+        },
+        "language_style": {
+          "code": 1,
+          "english": 4,
+          "telugu": 3
+        },
+        "risk_level": {
+          "high": 1,
+          "low": 4,
+          "moderate": 3
+        }
+      },
+      "groups": [
+        "antibiotics",
+        "asthma"
+      ]
+    },
+    "train": {
+      "count": 64,
+      "distributions": {
+        "capability": {
+          "clarify": 12,
+          "emergency": 8,
+          "general": 17,
+          "grounded": 13,
+          "multi": 7,
+          "symptom": 7
+        },
+        "domain": {
+          "cardio": 4,
+          "diabetes": 4,
+          "digestive": 4,
+          "emergency": 12,
+          "first_aid": 8,
+          "hygiene": 4,
+          "illness": 8,
+          "maternal": 4,
+          "musculoskeletal": 4,
+          "prevention": 8,
+          "skin": 4
+        },
+        "language": {
+          "en": 32,
+          "te": 32
+        },
+        "language_style": {
+          "code": 6,
+          "english": 32,
+          "telugu": 21,
+          "translit": 5
+        },
+        "risk_level": {
+          "high": 8,
+          "low": 39,
+          "moderate": 17
+        }
+      },
+      "groups": [
+        "anaphylaxis",
+        "backpain",
+        "burns",
+        "commoncold",
+        "constipation",
+        "diabetestype2",
+        "eczema",
+        "foodborneillness",
+        "foodsafety",
+        "healthscreening",
+        "heartattack",
+        "highbloodpressure",
+        "prenatalcare",
+        "sprainsandstrains",
+        "stroke",
+        "vaccines"
+      ]
+    },
+    "validation": {
+      "count": 8,
+      "distributions": {
+        "capability": {
+          "clarify": 1,
+          "emergency": 1,
+          "general": 2,
+          "grounded": 1,
+          "multi": 1,
+          "symptom": 2
+        },
+        "domain": {
+          "mental": 4,
+          "nutrition": 4
+        },
+        "language": {
+          "en": 4,
+          "te": 4
+        },
+        "language_style": {
+          "english": 4,
+          "telugu": 3,
+          "translit": 1
+        },
+        "risk_level": {
+          "high": 1,
+          "low": 3,
+          "moderate": 4
+        }
+      },
+      "groups": [
+        "anxiety",
+        "dehydration"
+      ]
+    }
+  },
+  "validation_errors": 0,
+  "verified_registry_sources": 936
+}
