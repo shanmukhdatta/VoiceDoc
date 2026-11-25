@@ -1,0 +1,12 @@
+{
+  "clinical_reviewed": 0,
+  "rag_checked": 30,
+  "record_errors": 0,
+  "semantic_verification": "requires qualified review",
+  "sft_checked": 60,
+  "status": "passed",
+  "tokenizer": {
+    "reason": "Pinned Qwen tokenizer assets and Transformers unavailable",
+    "status": "not_run"
+  }
+}

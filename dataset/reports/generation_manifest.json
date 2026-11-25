@@ -1,0 +1,14 @@
+{
+  "batch_inputs": {
+    "rag.tsv": "210c5b9bc5c766e9e5c3f2cfa851957d71a292e28cb369533bb0183ccb6c4ef0",
+    "sft.tsv": "99a116d77ad85f489c4f1e6144da2d7f4c3225589d91a59ce45487c8b06ee692"
+  },
+  "method": "Individually authored scenarios and factual bilingual passages; no API calls",
+  "rag_chunks": 30,
+  "rag_rows_sha256": "6b044eea7f72e4e3b6ebafbf345891b30168525b6e5fce90d06f1d371da873d1",
+  "registry_sha256": "9909e400b9626db41939d3681bb98c3e941dabc857c56bb003569258ca9f8418",
+  "sft_records": 60,
+  "sft_rows_sha256": "1aabf9d0e614cdc00ceb566fc29be148cc83b9abcb651bad04f4f2db5bf4c015",
+  "teacher": "ChatGPT in Codex Work Mode (GPT-6 family)",
+  "teacher_snapshot": null
+}
