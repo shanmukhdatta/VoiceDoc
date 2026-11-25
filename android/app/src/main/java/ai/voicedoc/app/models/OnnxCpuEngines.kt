@@ -60,6 +60,28 @@ class SileroOnnxCpu(model: File) : AutoCloseable {
     }
 }
 
+/**
+ * Full on-device multilingual-E5-small query embedding engine combining
+ * [ai.voicedoc.core.common.E5UnigramTokenizer] and [E5OnnxTokenEncoder].
+ */
+class E5QueryEmbeddingEngine(
+    model: File,
+    tokenizerJson: File
+) : ai.voicedoc.core.common.QueryEmbeddingEngine, AutoCloseable {
+    override val dimension: Int = 384
+    private val tokenizer = ai.voicedoc.core.common.E5UnigramTokenizer.fromFile(tokenizerJson)
+    private val encoder = E5OnnxTokenEncoder(model)
+
+    override suspend fun embedQuery(query: String): FloatArray {
+        val tokenized = tokenizer.encodeQuery(query)
+        return encoder.encodeTokenIds(tokenized.inputIds, tokenized.attentionMask)
+    }
+
+    override fun close() {
+        encoder.close()
+    }
+}
+
 internal fun flattenFloatData(value: Any?): List<Float> = when (value) {
     is Float -> listOf(value)
     is FloatArray -> value.toList()
@@ -125,5 +147,27 @@ class E5OnnxTokenEncoder(model: File) : AutoCloseable {
     override fun close() {
         session.close()
         options.close()
+    }
+}
+
+/**
+ * Full on-device multilingual-E5-small query embedding engine combining
+ * [ai.voicedoc.core.common.E5UnigramTokenizer] and [E5OnnxTokenEncoder].
+ */
+class E5QueryEmbeddingEngine(
+    model: File,
+    tokenizerJson: File
+) : ai.voicedoc.core.common.QueryEmbeddingEngine, AutoCloseable {
+    override val dimension: Int = 384
+    private val tokenizer = ai.voicedoc.core.common.E5UnigramTokenizer.fromFile(tokenizerJson)
+    private val encoder = E5OnnxTokenEncoder(model)
+
+    override suspend fun embedQuery(query: String): FloatArray {
+        val tokenized = tokenizer.encodeQuery(query)
+        return encoder.encodeTokenIds(tokenized.inputIds, tokenized.attentionMask)
+    }
+
+    override fun close() {
+        encoder.close()
     }
 }

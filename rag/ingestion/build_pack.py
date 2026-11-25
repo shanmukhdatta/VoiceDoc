@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 import sqlite3
+import struct
 import tempfile
 from pathlib import Path
 
@@ -19,6 +20,39 @@ REQUIRED = {
     "rights_verified", "clinician_reviewed", "reviewed_by",
     "text", "content_sha256",
 }
+
+
+def chunk_text(text: str, max_chars: int = 800) -> list[str]:
+    """Deterministically split text into <= max_chars chunks, preferring sentence boundaries."""
+    normalized = " ".join(text.split())
+    if not normalized:
+        return []
+    chunks: list[str] = []
+    start = 0
+    n = len(normalized)
+    while start < n:
+        end = min(start + max_chars, n)
+        if end < n:
+            window = normalized[start:end]
+            # Prefer sentence-ending punctuation or whitespace so medical warnings stay intact.
+            best = -1
+            for sep in (". ", "? ", "! ", "। ", "; ", ", "):
+                pos = window.rfind(sep)
+                if pos > max_chars // 3:
+                    best = max(best, pos + len(sep) - 1)
+            if best == -1:
+                ws = window.rfind(" ")
+                if ws > max_chars // 2:
+                    best = ws
+            if best != -1:
+                end = start + best + 1
+        piece = normalized[start:end].strip()
+        if piece:
+            chunks.append(piece)
+        start = end
+        while start < n and normalized[start] == " ":
+            start += 1
+    return chunks
 
 
 def validate(source: dict) -> None:
@@ -41,7 +75,7 @@ def validate(source: dict) -> None:
         raise ValueError("source content hash mismatch")
 
 
-def build(input_file: Path, output_file: Path) -> dict:
+def build(input_file: Path, output_file: Path, embeddings_json: Path | None = None) -> dict:
     entries = json.loads(input_file.read_text(encoding="utf-8"))
     if not isinstance(entries, list):
         raise ValueError("input must be a list of sources")
@@ -51,6 +85,12 @@ def build(input_file: Path, output_file: Path) -> dict:
         raise FileExistsError("refusing to overwrite an existing indexed corpus")
     if output_file.resolve() == input_file.resolve():
         raise ValueError("input and output must differ")
+    embeddings_map: dict[str, list[float]] = {}
+    if embeddings_json is not None:
+        raw_emb = json.loads(embeddings_json.read_text(encoding="utf-8"))
+        if not isinstance(raw_emb, dict):
+            raise ValueError("embeddings_json must map chunk_id to float list")
+        embeddings_map = raw_emb
     ids = set()
     for source in entries:
         if not isinstance(source, dict):
@@ -67,6 +107,8 @@ def build(input_file: Path, output_file: Path) -> dict:
     os.close(descriptor)
     staging_file = Path(temporary_name)
     connection = sqlite3.connect(staging_file)
+    chunk_count = 0
+    embedded_count = 0
     try:
         connection.executescript("""
             PRAGMA foreign_keys = ON;
@@ -85,6 +127,11 @@ def build(input_file: Path, output_file: Path) -> dict:
                 language TEXT NOT NULL,
                 content TEXT NOT NULL
             );
+            CREATE TABLE chunk_embeddings (
+                chunk_id TEXT PRIMARY KEY REFERENCES chunks(chunk_id),
+                dim INTEGER NOT NULL,
+                embedding BLOB NOT NULL
+            );
             CREATE VIRTUAL TABLE chunks_fts USING fts5(chunk_id UNINDEXED, content, tokenize='unicode61');
         """)
         for source in sorted(entries, key=lambda item: item["source_id"]):
@@ -94,15 +141,21 @@ def build(input_file: Path, output_file: Path) -> dict:
                  source["license"], source["language"], source["reviewed_by"],
                  source["content_sha256"]),
             )
-            text = " ".join(source["text"].split())
-            # Character-bounded deterministic chunks; future semantic chunking needs clinician evaluation.
-            for index, start in enumerate(range(0, len(text), 800), start=1):
-                chunk = text[start:start + 800]
+            for index, chunk in enumerate(chunk_text(source["text"], max_chars=800), start=1):
                 chunk_id = f"{source['source_id']}:{index:04d}"
                 connection.execute("INSERT INTO chunks VALUES (?,?,?,?)",
                                    (chunk_id, source["source_id"], source["language"], chunk))
                 connection.execute("INSERT INTO chunks_fts(chunk_id,content) VALUES (?,?)",
                                    (chunk_id, chunk))
+                chunk_count += 1
+                if chunk_id in embeddings_map:
+                    vec = embeddings_map[chunk_id]
+                    blob = struct.pack(f"<{len(vec)}f", *(float(x) for x in vec))
+                    connection.execute(
+                        "INSERT INTO chunk_embeddings VALUES (?,?,?)",
+                        (chunk_id, len(vec), blob),
+                    )
+                    embedded_count += 1
         connection.commit()
     except BaseException:
         connection.close()
@@ -123,15 +176,22 @@ def build(input_file: Path, output_file: Path) -> dict:
         raise
     staging_file.unlink()
     digest = hashlib.sha256(output_file.read_bytes()).hexdigest()
-    return {"source_count": len(entries), "sha256": digest, "bytes": output_file.stat().st_size}
+    return {
+        "source_count": len(entries),
+        "chunk_count": chunk_count,
+        "embedded_count": embedded_count,
+        "sha256": digest,
+        "bytes": output_file.stat().st_size,
+    }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True, help="licensed and reviewed JSON list")
     parser.add_argument("--output", type=Path, required=True, help="new SQLite file (refuses overwrite)")
+    parser.add_argument("--embeddings-json", type=Path, help="optional chunk_id->vector JSON from embed_corpus.py")
     args = parser.parse_args()
-    report = build(args.input, args.output)
+    report = build(args.input, args.output, embeddings_json=args.embeddings_json)
     print(json.dumps(report, indent=2))
     return 0
 

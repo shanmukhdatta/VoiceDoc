@@ -21,6 +21,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -30,13 +32,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import ai.voicedoc.core.common.Citation
 import ai.voicedoc.core.common.SupportedLanguage
 import ai.voicedoc.app.data.EncryptedHistoryStore
 import ai.voicedoc.app.data.SavedConversationTurn
+import ai.voicedoc.app.models.AssistantReadiness
+import ai.voicedoc.app.models.VoiceDocAssistantController
 
 internal enum class Screen { HOME, CHAT, SOURCES, MODELS, SETTINGS, PRIVACY, HISTORY, DIAGNOSTICS, ABOUT, TTS_TEST, MIC_TEST }
 
-internal data class ChatMessage(val fromUser: Boolean, val message: String)
+internal data class ChatMessage(
+    val fromUser: Boolean,
+    val message: String,
+    val citations: List<Citation> = emptyList()
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +57,10 @@ fun VoiceDoctorApp() {
     var routeName by rememberSaveable { mutableStateOf(Screen.HOME.name) }
     val route = Screen.entries.firstOrNull { it.name == routeName } ?: Screen.HOME
     val isTe = languageTag == SupportedLanguage.TELUGU.tag
+    val assistantController = remember(context) { VoiceDocAssistantController(context) }
+    DisposableEffect(assistantController) { onDispose { assistantController.close() } }
+    var readiness by remember { mutableStateOf<AssistantReadiness?>(null) }
+    LaunchedEffect(route) { readiness = assistantController.readiness() }
     val encryptedStore = remember(context) { EncryptedHistoryStore(context) }
     var historyEnabled by rememberSaveable { mutableStateOf(prefs.getBoolean("encrypted_history_enabled", false)) }
     var historyError by remember { mutableStateOf(false) }
@@ -139,8 +152,15 @@ fun VoiceDoctorApp() {
         Column(modifier = Modifier.fillMaxSize().padding(inner)) {
             Crossfade(targetState = route, animationSpec = tween(250), label = "screen-transition") { visibleRoute ->
                 when (visibleRoute) {
-                    Screen.HOME -> HomePage(isTe, onNavigate = ::navigate)
-                    Screen.CHAT -> ChatPage(isTe, messages, onClear = { messages.clear() }, onMessagesChanged = { saveHistory() })
+                    Screen.HOME -> HomePage(isTe, readiness = readiness, onNavigate = ::navigate)
+                    Screen.CHAT -> ChatPage(
+                        isTe = isTe,
+                        messages = messages,
+                        assistantController = assistantController,
+                        readiness = readiness,
+                        onClear = { messages.clear() },
+                        onMessagesChanged = { saveHistory() }
+                    )
                     Screen.SOURCES -> SourcesPage(isTe)
                     Screen.MODELS -> ModelsPage(isTe)
                     Screen.SETTINGS -> SettingsPage(
@@ -168,7 +188,7 @@ fun VoiceDoctorApp() {
                     )
                     Screen.PRIVACY -> PrivacyPage(isTe, historyEnabled, onClear = { messages.clear(); saveHistory() })
                     Screen.HISTORY -> HistoryPage(isTe, historyEnabled, messages, onErase = { eraseHistory() })
-                    Screen.DIAGNOSTICS -> DiagnosticsPage(isTe)
+                    Screen.DIAGNOSTICS -> DiagnosticsPage(isTe, readiness = readiness)
                     Screen.TTS_TEST -> OfflineVoiceTestPage(isTe)
                     Screen.MIC_TEST -> MicrophoneTestPage(isTe)
                     Screen.ABOUT -> AboutPage(isTe)

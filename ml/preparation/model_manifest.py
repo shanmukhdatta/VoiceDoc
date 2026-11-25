@@ -14,17 +14,18 @@ from pathlib import Path
 
 REQUIRED = {"id", "path", "sha256", "bytes", "format", "source", "revision",
             "license", "redistribution_reviewed", "languages"}
-ALLOWED_FORMATS = {"litertlm", "onnx", "ggml", "gguf", "sqlite", "bin"}
+ALLOWED_FORMATS = {"litertlm", "onnx", "ggml", "gguf", "sqlite", "bin", "json"}
 PACK_REQUIRED = {"schema_version", "pack_id", "version", "kind", "runtime",
                  "languages", "assets"}
-PACK_KINDS = {"generation", "embedding", "speech", "knowledge"}
+PACK_KINDS = {"generation", "embedding", "speech", "knowledge", "bundle"}
 PACK_ROLES = {
     "generation": {"model", "tokenizer"},
     "embedding": {"model", "tokenizer"},
     "speech": {"model"},
     "knowledge": {"index"},
+    "bundle": {"model", "embedding_model", "embedding_tokenizer", "index"},
 }
-ASSET_ROLES = {"model", "tokenizer", "vocabulary", "index", "config"}
+ASSET_ROLES = {"model", "tokenizer", "embedding_model", "embedding_tokenizer", "vad_model", "vocabulary", "index", "config"}
 
 
 def check_record(record: dict, root: Path) -> dict:
@@ -107,13 +108,13 @@ def check_pack(pack: dict, root: Path, expected_runtime: str | None = None,
     ) or len(languages) != len(set(languages)):
         raise ValueError("Pack languages must be a unique non-empty subset of en/te")
     dimension = pack.get("embedding_dimension")
-    if kind == "embedding":
+    if kind in ("embedding", "bundle"):
         if type(dimension) is not int or dimension <= 0:
-            raise ValueError("Embedding pack requires a positive embedding_dimension")
+            raise ValueError(f"{kind} pack requires a positive embedding_dimension")
         if expected_embedding_dimension is not None and dimension != expected_embedding_dimension:
             raise ValueError("Incompatible embedding dimension")
     elif dimension is not None:
-        raise ValueError("embedding_dimension is only valid for embedding packs")
+        raise ValueError("embedding_dimension is only valid for embedding or bundle packs")
 
     assets = pack["assets"]
     if not isinstance(assets, list) or not assets:
@@ -144,14 +145,17 @@ def check_pack(pack: dict, root: Path, expected_runtime: str | None = None,
     missing_roles = PACK_ROLES[kind] - roles
     if missing_roles:
         raise ValueError(f"Missing required {kind} asset roles: {sorted(missing_roles)}")
-    if kind == "generation" and any(asset["format"] != "litertlm" for asset in assets
-                                     if asset["role"] == "model"):
+    if kind in ("generation", "bundle") and any(asset["format"] != "litertlm" for asset in assets
+                                               if asset["role"] == "model"):
         raise ValueError("Generation model must use the LiteRT-LM format")
     if kind == "embedding" and any(asset["format"] != "onnx" for asset in assets
                                     if asset["role"] == "model"):
         raise ValueError("Embedding model must use the ONNX format")
-    if kind == "knowledge" and any(asset["format"] != "sqlite" for asset in assets
-                                    if asset["role"] == "index"):
+    if kind == "bundle" and any(asset["format"] != "onnx" for asset in assets
+                                if asset["role"] == "embedding_model"):
+        raise ValueError("Bundle embedding_model must use the ONNX format")
+    if kind in ("knowledge", "bundle") and any(asset["format"] != "sqlite" for asset in assets
+                                              if asset["role"] == "index"):
         raise ValueError("Knowledge index must use the SQLite format")
     return {
         "pack_id": pack["pack_id"], "version": pack["version"], "kind": kind,

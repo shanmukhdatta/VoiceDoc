@@ -68,6 +68,35 @@ class BuildPackTests(unittest.TestCase):
             self.assertEqual(output.read_bytes(), b"existing")
             self.assertEqual(list(base.glob(".pack.db.*.staging")), [])
 
+    def test_stores_chunk_embeddings_and_preserves_sentence_boundaries(self):
+        import struct
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            sentence_a = "Seek urgent care if chest pain occurs. " * 25
+            sentence_b = "Stay hydrated and monitor fever."
+            txt = sentence_a + sentence_b
+            src = self.source()
+            src["text"] = txt
+            src["content_sha256"] = hashlib.sha256(txt.encode()).hexdigest()
+            (base / "src.json").write_text(json.dumps([src]), encoding="utf-8")
+            emb = {"synthetic-only:0001": [0.5, 0.5, 0.5, 0.5]}
+            (base / "emb.json").write_text(json.dumps(emb), encoding="utf-8")
+            report = build(base / "src.json", base / "pack.db", embeddings_json=base / "emb.json")
+            self.assertEqual(report["chunk_count"], 2)
+            self.assertEqual(report["embedded_count"], 1)
+            conn = sqlite3.connect(base / "pack.db")
+            try:
+                rows = conn.execute("SELECT chunk_id, content FROM chunks ORDER BY chunk_id").fetchall()
+                self.assertTrue(rows[0][1].endswith("."))
+                dim, blob = conn.execute(
+                    "SELECT dim, embedding FROM chunk_embeddings WHERE chunk_id=?",
+                    ("synthetic-only:0001",),
+                ).fetchone()
+                self.assertEqual(dim, 4)
+                self.assertEqual(list(struct.unpack("<4f", blob)), [0.5, 0.5, 0.5, 0.5])
+            finally:
+                conn.close()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -35,6 +35,9 @@ import kotlinx.coroutines.launch
 internal fun ExperimentalModelPage(isTe: Boolean) {
     val context = LocalContext.current
     val store = remember(context) { ExperimentalModelStore(context) }
+    val bundleImporter = remember(context) {
+        LocalModelPackImporter(context, "litertlm", "0.18.0", expectedEmbeddingDimension = 384, expectedKind = "bundle")
+    }
     val packImporter = remember(context) {
         LocalModelPackImporter(context, "litertlm", "0.18.0", expectedKind = "generation")
     }
@@ -46,8 +49,12 @@ internal fun ExperimentalModelPage(isTe: Boolean) {
     var publisherManifestHash by remember { mutableStateOf("") }
     // Updates the view when a model was imported or removed.
     val file = remember(revision) { store.existing() }
+    var installedBundles by remember { mutableStateOf(emptyList<ai.voicedoc.app.models.InstalledModelPack>()) }
     var installedPacks by remember { mutableStateOf(emptyList<ai.voicedoc.app.models.InstalledModelPack>()) }
-    LaunchedEffect(revision) { installedPacks = packImporter.installed() }
+    LaunchedEffect(revision) {
+        installedBundles = bundleImporter.installed()
+        installedPacks = packImporter.installed()
+    }
     val selectModel = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null && !busy) {
             busy = true
@@ -132,6 +139,45 @@ internal fun ExperimentalModelPage(isTe: Boolean) {
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
+        val selectBundle = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null && !busy) {
+                busy = true
+                scope.launch {
+                    try {
+                        val pack = bundleImporter.import(uri, publisherManifestHash)
+                        information = "Installed VoiceDoc bundle ${pack.id} ${pack.version} (${pack.assets.size} assets). Chat and RAG retrieval are now connected to this pack."
+                        revision++
+                    } catch (e: Exception) {
+                        information = "VoiceDoc bundle import failed: ${e.javaClass.simpleName} — ${e.message.orEmpty().take(150)}"
+                    } finally { busy = false }
+                }
+            }
+        }
+        Button(
+            enabled = !busy && publisherManifestHash.length == 64,
+            onClick = { selectBundle.launch(arrayOf("application/zip", "application/octet-stream", "*/*")) },
+            modifier = Modifier.fillMaxWidth()
+        ) { Text(if (isTe) "VoiceDoc_Model_Pack.zip దిగుమతి" else "Import VoiceDoc_Model_Pack.zip (Full Bundle)") }
+        for (bundle in installedBundles) {
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("${bundle.id} ${bundle.version} · ${bundle.kind}", style = MaterialTheme.typography.titleSmall)
+                    Text("Runtime ${bundle.runtimeName} ${bundle.runtimeVersion} · Dim ${bundle.embeddingDimension} · ${bundle.languages.sorted().joinToString()}")
+                    Text("Manifest SHA-256 ${bundle.manifestSha256}", style = MaterialTheme.typography.bodySmall)
+                    OutlinedButton(enabled = !busy, onClick = {
+                        busy = true
+                        scope.launch {
+                            try {
+                                bundleImporter.remove(bundle.id, bundle.version)
+                                information = "Removed bundle ${bundle.id} ${bundle.version}."
+                                revision++
+                            } catch (e: Exception) { information = "Removal failed: ${e.javaClass.simpleName}" }
+                            finally { busy = false }
+                        }
+                    }) { Text(if (isTe) "బండిల్ తొలగించు" else "Remove bundle") }
+                }
+            }
+        }
         val selectPack = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri != null && !busy) {
                 busy = true

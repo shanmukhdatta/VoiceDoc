@@ -199,13 +199,13 @@ class LocalModelPackImporter(
         val languages = json.stringSet("languages", setOf("en", "te"))
         if (languages.isEmpty()) throw IOException("Model pack must declare English or Telugu")
         val dimension = if (json.has("embedding_dimension")) json.optInt("embedding_dimension", -1) else null
-        if (kind == "embedding") {
+        if (kind == "embedding" || kind == "bundle") {
             if (dimension == null || dimension <= 0) throw IOException("Embedding dimension is required")
             if (expectedEmbeddingDimension != null && dimension != expectedEmbeddingDimension) {
                 throw IOException("Incompatible embedding dimension")
             }
         } else if (dimension != null) {
-            throw IOException("Only embedding packs may declare embedding_dimension")
+            throw IOException("Only embedding or bundle packs may declare embedding_dimension")
         }
 
         val array = json.optJSONArray("assets") ?: throw IOException("Pack assets are missing")
@@ -245,16 +245,20 @@ class LocalModelPackImporter(
         val requiredRoles = when (kind) {
             "generation", "embedding" -> setOf("model", "tokenizer")
             "speech" -> setOf("model")
+            "bundle" -> setOf("model", "embedding_model", "embedding_tokenizer", "index")
             else -> setOf("index")
         }
         if (!records.keys.containsAll(requiredRoles)) throw IOException("Pack is missing required asset roles")
-        if (kind == "generation" && records.getValue("model").format != "litertlm") {
+        if ((kind == "generation" || kind == "bundle") && records.getValue("model").format != "litertlm") {
             throw IOException("Generation model must use LiteRT-LM format")
         }
         if (kind == "embedding" && records.getValue("model").format != "onnx") {
             throw IOException("Embedding model must use ONNX format")
         }
-        if (kind == "knowledge" && records.getValue("index").format != "sqlite") {
+        if (kind == "bundle" && records.getValue("embedding_model").format != "onnx") {
+            throw IOException("Bundle embedding_model must use ONNX format")
+        }
+        if ((kind == "knowledge" || kind == "bundle") && records.getValue("index").format != "sqlite") {
             throw IOException("Knowledge index must use SQLite format")
         }
         return ParsedPack(id, version, kind, runtimeName, runtimeVersion, languages, dimension, manifestHash, records)
@@ -379,8 +383,8 @@ class LocalModelPackImporter(
         val PACK_VERSION = Regex("^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$")
         val ASSET_ID = Regex("^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
         val INSTALLED_DIR = Regex("^pack-[A-Za-z0-9][A-Za-z0-9._-]{0,63}-[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$")
-        val PACK_KINDS = setOf("generation", "embedding", "speech", "knowledge")
-        val ALLOWED_ROLES = setOf("model", "tokenizer", "vocabulary", "index", "config")
-        val FORMATS = setOf("litertlm", "onnx", "ggml", "gguf", "sqlite", "bin")
+        val PACK_KINDS = setOf("generation", "embedding", "speech", "knowledge", "bundle")
+        val ALLOWED_ROLES = setOf("model", "tokenizer", "embedding_model", "embedding_tokenizer", "vad_model", "vocabulary", "index", "config")
+        val FORMATS = setOf("litertlm", "onnx", "ggml", "gguf", "sqlite", "bin", "json")
     }
 }

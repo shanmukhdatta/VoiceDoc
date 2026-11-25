@@ -4,8 +4,12 @@ import json
 from pathlib import Path
 import shutil
 import tempfile
-from train_qlora import sha256_file
-from run_kaggle import model_files
+try:
+    from ml.training.train_qlora import sha256_file
+    from ml.training.run_kaggle import model_files
+except ModuleNotFoundError:
+    from train_qlora import sha256_file
+    from run_kaggle import model_files
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)

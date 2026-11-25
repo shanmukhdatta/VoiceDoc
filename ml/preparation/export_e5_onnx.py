@@ -56,11 +56,39 @@ def export(local_model: Path, output: Path) -> None:
         weights = mask.unsqueeze(-1).float()
         pooled = (hidden * weights).sum(1) / weights.sum(1).clamp(min=1)
         normalized = torch.nn.functional.normalize(pooled, p=2, dim=1)
-    tokenizer.save_pretrained(str(output / "tokenizer"))
+    if normalized.shape[-1] != 384:
+        raise ValueError(f"Expected 384-dim E5-small embeddings, got {normalized.shape[-1]}")
+
+    tokenizer_dir = output / "tokenizer"
+    tokenizer.save_pretrained(str(tokenizer_dir))
+    if not (tokenizer_dir / "tokenizer.json").is_file():
+        raise RuntimeError("Fast tokenizer did not emit tokenizer.json required by Android")
+
+    onnx_max_abs_diff = None
+    try:
+        import numpy as np
+        import onnxruntime as ort
+
+        sess = ort.InferenceSession(str(output / "encoder.onnx"), providers=["CPUExecutionProvider"])
+        ort_out = sess.run(
+            ["last_hidden_state"],
+            {"input_ids": ids.numpy(), "attention_mask": mask.numpy()},
+        )[0]
+        w_np = mask.numpy()[..., None].astype(np.float32)
+        pooled_np = (ort_out * w_np).sum(axis=1) / np.clip(w_np.sum(axis=1), 1.0, None)
+        norms = np.linalg.norm(pooled_np, axis=1, keepdims=True)
+        norm_np = pooled_np / np.clip(norms, 1e-12, None)
+        onnx_max_abs_diff = float(np.max(np.abs(norm_np - normalized.numpy())))
+        if onnx_max_abs_diff > 1e-4:
+            raise RuntimeError(f"ONNX vs PyTorch parity check failed: max_abs_diff={onnx_max_abs_diff}")
+    except ImportError:
+        pass
+
     (output / "golden-reference.json").write_text(json.dumps({
         "input_ids": ids.tolist(), "attention_mask": mask.tolist(),
         "normalized_embeddings": normalized.tolist(),
         "dimension": normalized.shape[-1],
+        "onnx_max_abs_diff": onnx_max_abs_diff,
         "backend": "PyTorch CPU", "note": "Verify exact Android tokenization and ONNX parity"
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     print("Exported local ONNX graph and tokenizer/golden reference (not validated on Android).")

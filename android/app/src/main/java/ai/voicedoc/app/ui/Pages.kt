@@ -28,6 +28,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import ai.voicedoc.app.models.AssistantReadiness
+import ai.voicedoc.app.models.AssistantReply
+import ai.voicedoc.app.models.VoiceDocAssistantController
 import ai.voicedoc.app.speech.OnDeviceSpeechService
 import ai.voicedoc.app.speech.DeviceOfflineTts
 import ai.voicedoc.core.common.SupportedLanguage
@@ -36,6 +39,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -44,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -53,7 +58,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import ai.voicedoc.core.common.OfflineSafetyFallback
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 @Composable
 private fun Page(content: @Composable () -> Unit) {
@@ -108,7 +114,7 @@ internal fun OnboardingPage(isTe: Boolean, onLanguage: (String) -> Unit, onProce
 }
 
 @Composable
-internal fun HomePage(isTe: Boolean, onNavigate: (Screen) -> Unit) {
+internal fun HomePage(isTe: Boolean, readiness: AssistantReadiness? = null, onNavigate: (Screen) -> Unit) {
     Page {
         SoftCard(Modifier.fillMaxWidth()) {
             Row(
@@ -146,8 +152,26 @@ internal fun HomePage(isTe: Boolean, onNavigate: (Screen) -> Unit) {
             Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = androidx.compose.ui.Alignment.Top) {
                 Text("i", color = VoiceDocColors.Forest, fontWeight = FontWeight.Bold, modifier = Modifier.size(28.dp).background(VoiceDocColors.Mint, RoundedCornerShape(10.dp)).padding(start = 10.dp, top = 3.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Text(if (isTe) "పరిశోధనా ప్రోటోటైప్" else "Research prototype", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                    Text(if (isTe) "వైద్య AI మోడల్ లేదా సమీక్షించిన జ్ఞాన ప్యాక్ ఈ బిల్డ్‌లో లేదు. చాట్ వైద్య సమాధానాలు ఇవ్వదు." else "Medical model and reviewed knowledge are not installed in this build. Chat does not provide medical answers.", style = MaterialTheme.typography.bodySmall, color = VoiceDocColors.Muted)
+                    val ready = readiness?.fullyReady == true
+                    Text(
+                        if (ready) (if (isTe) "ఆఫ్‌లైన్ ప్యాక్ సిద్ధంగా ఉంది" else "Offline pack ready")
+                        else (if (isTe) "మోడల్ ప్యాక్ అవసరం" else "Model pack required"),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        if (ready) {
+                            val id = readiness?.bundlePackId ?: "bundle"
+                            val ver = readiness?.bundleVersion ?: ""
+                            if (isTe) "ధృవీకరించిన ప్యాక్ ($id $ver) ఇన్‌స్టాల్ చేయబడింది."
+                            else "Verified pack ($id $ver) installed. Responses remain general health information only."
+                        } else {
+                            if (isTe) "వైద్య AI మోడల్ లేదా జ్ఞాన ప్యాక్ ఇంకా ఇన్‌స్టాల్ కాలేదు. మోడల్స్ ట్యాబ్‌లో VoiceDoc_Model_Pack.zip దిగుమతి చేయండి."
+                            else "Medical model or knowledge pack not installed yet. Import VoiceDoc_Model_Pack.zip in the Models tab."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = VoiceDocColors.Muted
+                    )
                 }
             }
         }
@@ -180,12 +204,17 @@ private fun QuickActionCard(icon: String, title: String, modifier: Modifier = Mo
 internal fun ChatPage(
     isTe: Boolean,
     messages: SnapshotStateList<ChatMessage>,
+    assistantController: VoiceDocAssistantController,
+    readiness: AssistantReadiness?,
     onClear: () -> Unit,
     onMessagesChanged: () -> Unit
 ) {
     var input by rememberSaveable { mutableStateOf("") }
     var speechStatus by rememberSaveable { mutableStateOf("") }
+    var activeJob by remember { mutableStateOf<Job?>(null) }
+    var generating by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val localSpeech = remember(context) {
         OnDeviceSpeechService(
             context = context,
@@ -210,15 +239,32 @@ internal fun ChatPage(
     }
     fun submit() {
         val clean = input.trim()
-        if (clean.isEmpty() || clean.length > 1000) return
+        if (clean.isEmpty() || clean.length > 1000 || generating) return
+        val lang = if (isTe) SupportedLanguage.TELUGU else SupportedLanguage.ENGLISH
         messages.add(ChatMessage(true, clean))
-        messages.add(ChatMessage(false, OfflineSafetyFallback.respond(clean, isTe)))
         onMessagesChanged()
         input = ""
+        generating = true
+        activeJob = scope.launch {
+            try {
+                when (val reply = assistantController.ask(clean, lang)) {
+                    is AssistantReply.Evidenced ->
+                        messages.add(ChatMessage(false, reply.text, reply.citations))
+                    is AssistantReply.Escalation ->
+                        messages.add(ChatMessage(false, reply.text))
+                    is AssistantReply.Unavailable ->
+                        messages.add(ChatMessage(false, reply.text))
+                }
+                onMessagesChanged()
+            } finally {
+                generating = false
+                activeJob = null
+            }
+        }
     }
     Page {
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            AssistantOrb(size = 58.dp, listening = speechStatus.contains("Listening", ignoreCase = true))
+            AssistantOrb(size = 58.dp, listening = speechStatus.contains("Listening", ignoreCase = true) || generating)
             Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(if (isTe) "మీ సహాయకుడు" else "Your assistant", style = MaterialTheme.typography.headlineSmall, color = VoiceDocColors.Forest)
                 Text(if (isTe) "స్థానిక మరియు ప్రైవేట్" else "Private · on-device", style = MaterialTheme.typography.bodySmall, color = VoiceDocColors.Muted)
@@ -226,8 +272,38 @@ internal fun ChatPage(
         }
         SoftCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Text(if (isTe) "ప్రోటోటైప్ స్థితి" else "Prototype status", style = MaterialTheme.typography.labelLarge, color = VoiceDocColors.Forest, fontWeight = FontWeight.SemiBold)
-                Text(if (isTe) "వైద్య మోడల్ లేదా సమీక్షించిన జ్ఞాన ప్యాక్ లేదు; చాట్ వైద్య సమాధానాలు ఇవ్వదు." else "No medical model or reviewed knowledge pack is installed. Chat does not provide medical answers.", style = MaterialTheme.typography.bodySmall, color = VoiceDocColors.Muted)
+                val ready = readiness?.fullyReady == true
+                Text(
+                    if (ready) (if (isTe) "ఆఫ్‌లైన్ AI స్థితి" else "Offline AI status")
+                    else (if (isTe) "మోడల్ స్థితి" else "Model status"),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = VoiceDocColors.Forest,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    if (ready) {
+                        val sem = if (readiness?.semanticEmbeddingsReady == true) "E5 semantic + FTS5" else "FTS5 lexical"
+                        if (isTe) "ఆఫ్‌లైన్ Qwen3 + $sem శోధన సిద్ధంగా ఉంది. సాధారణ ఆరోగ్య సమాచారం మాత్రమే."
+                        else "Offline Qwen3 + $sem retrieval ready. General health information only."
+                    } else {
+                        if (isTe) "వైద్య మోడల్ లేదా జ్ఞాన ప్యాక్ ఇంకా ఇన్‌స్టాల్ కాలేదు. మోడల్స్ ట్యాబ్‌లో దిగుమతి చేయండి."
+                        else "No verified model or knowledge pack installed yet. Import VoiceDoc_Model_Pack.zip in Models."
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = VoiceDocColors.Muted
+                )
+            }
+        }
+        if (generating) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            OutlinedButton(
+                onClick = {
+                    activeJob?.cancel()
+                    generating = false
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(if (isTe) "ఉత్పత్తిని ఆపండి" else "Cancel generation")
             }
         }
         for (message in messages) {
@@ -250,6 +326,16 @@ internal fun ChatPage(
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(message.message, color = VoiceDocColors.Ink)
+                        if (message.citations.isNotEmpty()) {
+                            HorizontalDivider()
+                            val citeLabel = if (isTe) "ఆధారాలు:" else "Sources:"
+                            val citeText = message.citations.joinToString("\n") { "• [${it.sourceId}] ${it.title}" }
+                            Text(
+                                "$citeLabel\n$citeText",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = VoiceDocColors.Forest
+                            )
+                        }
                     }
                 }
             }
@@ -439,7 +525,7 @@ internal fun HistoryPage(
 }
 
 @Composable
-internal fun DiagnosticsPage(isTe: Boolean) {
+internal fun DiagnosticsPage(isTe: Boolean, readiness: AssistantReadiness? = null) {
     val context = LocalContext.current
     var sample by remember { mutableStateOf<ai.voicedoc.app.metrics.DeviceMemorySnapshot?>(null) }
     Page {
@@ -452,10 +538,16 @@ internal fun DiagnosticsPage(isTe: Boolean) {
             Section("Live device memory",
                 "Total RAM: ${m.totalRamMb} MB · Available RAM: ${m.availableRamMb} MB · Process PSS: ${m.processPssMb} MB · Native heap: ${m.nativeHeapMb} MB · Low-memory: ${m.lowMemory}")
         }
+        val backendStatus = if (readiness != null) {
+            "Pack: ${readiness.bundlePackId ?: "none"} ${readiness.bundleVersion ?: ""} · " +
+                "LLM: ${readiness.llmModelReady} · Knowledge DB: ${readiness.knowledgeReady} · " +
+                "E5 ONNX: ${readiness.semanticEmbeddingsReady} · ARM64: ${readiness.arm64Supported}"
+        } else {
+            if (isTe) "ఏ AI మోడల్ లోడ్ కాలేదు." else "No AI models loaded."
+        }
         Section(
             if (isTe) "నడుస్తున్న మోడల్" else "Runtime backend",
-            if (isTe) "ఏ AI మోడల్ లోడ్ కాలేదు. బెంచ్‌మార్క్ ఫలితాలు లేవు."
-            else "No AI models loaded. No inference benchmarks have been executed."
+            backendStatus
         )
         Section(
             if (isTe) "అనుమతులు" else "Permissions",
