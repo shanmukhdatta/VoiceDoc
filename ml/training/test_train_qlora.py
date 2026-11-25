@@ -21,7 +21,7 @@ def reviewed(scenario_id="scenario-1", language="en"):
 
 
 class FakeTokenizer:
-    def apply_chat_template(self, messages, tokenize, add_generation_prompt):
+    def apply_chat_template(self, messages, tokenize, add_generation_prompt, enable_thinking=False):
         assert tokenize is True
         text = "|".join(f"{item['role']}:{item['content']}" for item in messages)
         if add_generation_prompt:

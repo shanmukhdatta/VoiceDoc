@@ -25,9 +25,10 @@ except ModuleNotFoundError:
 
 
 SYSTEM_PROMPT = (
-    "You provide general health information, not diagnosis or treatment. Use only information "
-    "in the user's provided context. State when the context is insufficient. Do not claim to "
-    "rule out emergencies. Keep the user's language."
+    "Provide concise general health information, not diagnosis or treatment. When evidence is "
+    "provided, ground claims in it; state when it is insufficient. Without evidence, be cautious "
+    "and acknowledge uncertainty. Do not rule out emergencies. Escalate urgent warning signs "
+    "promptly. Keep the user's language."
 )
 
 
@@ -77,10 +78,10 @@ def tokenize_example(tokenizer: Any, row: dict, max_length: int) -> dict[str, li
     ]
     complete_messages = prompt_messages + [{"role": "assistant", "content": row["response"]}]
     prompt_ids = tokenizer.apply_chat_template(
-        prompt_messages, tokenize=True, add_generation_prompt=True
+        prompt_messages, tokenize=True, add_generation_prompt=True, enable_thinking=False
     )
     full_ids = tokenizer.apply_chat_template(
-        complete_messages, tokenize=True, add_generation_prompt=False
+        complete_messages, tokenize=True, add_generation_prompt=False, enable_thinking=False
     )
     if not isinstance(prompt_ids, list) or not isinstance(full_ids, list):
         raise ValueError("Tokenizer chat template must return token ID lists")
@@ -184,6 +185,12 @@ def train(args: argparse.Namespace, train_rows: list[dict], validation_rows: lis
                 "labels": torch.tensor(labels, dtype=torch.long),
             }
 
+    if config.model_type != "qwen3":
+        raise ValueError("Expected dense Qwen3")
+    if torch.cuda.device_count() != 1:
+        raise RuntimeError("Set CUDA_VISIBLE_DEVICES=0 before launching")
+    from transformers import set_seed
+    set_seed(args.seed)
     precision = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
     quantization = BitsAndBytesConfig(
         load_in_4bit=True,
@@ -196,7 +203,7 @@ def train(args: argparse.Namespace, train_rows: list[dict], validation_rows: lis
         config=config,
         local_files_only=True,
         trust_remote_code=False,
-        device_map="auto",
+        device_map={"": 0},
         quantization_config=quantization,
         torch_dtype=precision,
     )
@@ -218,7 +225,7 @@ def train(args: argparse.Namespace, train_rows: list[dict], validation_rows: lis
         per_device_eval_batch_size=args.eval_batch_size,
         gradient_accumulation_steps=args.gradient_accumulation,
         learning_rate=args.learning_rate,
-        warmup_ratio=0.03,
+        warmup_ratio=args.warmup_ratio,
         lr_scheduler_type="cosine",
         logging_steps=10,
         eval_strategy="epoch",
@@ -245,11 +252,14 @@ def train(args: argparse.Namespace, train_rows: list[dict], validation_rows: lis
     )
     runner.train(resume_from_checkpoint=args.resume_from_checkpoint)
     evaluation = runner.evaluate()
+    heldout = runner.evaluate(TokenizedRows(load_reviewed_jsonl(args.test_jsonl)), metric_key_prefix="test") if args.test_jsonl else None
+    runner.save_state()
     adapter_dir = args.output_dir / "adapter"
     runner.model.save_pretrained(adapter_dir)
     tokenizer.save_pretrained(adapter_dir)
     return {
         "evaluation": evaluation,
+        "heldout_loss_metrics": heldout,
         "precision": str(precision),
         "adapter_dir": str(adapter_dir),
         "versions": {name: package_version(name) for name in
@@ -277,6 +287,8 @@ def main() -> None:
     parser.add_argument("--lora-dropout", type=float, default=0.05)
     parser.add_argument("--target-modules", default="q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj")
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--warmup-ratio", type=float, default=0.05)
+    parser.add_argument("--test-jsonl", type=Path)
     parser.add_argument("--resume-from-checkpoint")
     parser.add_argument("--validate-only", action="store_true",
                         help="Validate provenance fields and group split without loading ML packages or using a GPU")
@@ -295,6 +307,10 @@ def main() -> None:
     train_rows = load_reviewed_jsonl(args.train_jsonl)
     validation_rows = load_reviewed_jsonl(args.validation_jsonl)
     check_splits(train_rows, validation_rows)
+    if args.test_jsonl:
+        check_splits(train_rows + validation_rows, load_reviewed_jsonl(args.test_jsonl))
+    if not 0 <= args.warmup_ratio < 1:
+        parser.error("--warmup-ratio must be in [0, 1)")
     if not args.base_model_revision.strip():
         parser.error("--base-model-revision must identify the exact base checkpoint")
     if args.validate_only:
@@ -310,6 +326,9 @@ def main() -> None:
         "base_model_revision": args.base_model_revision,
         "training_data_sha256": sha256_file(args.train_jsonl),
         "validation_data_sha256": sha256_file(args.validation_jsonl),
+        "test_data_sha256": sha256_file(args.test_jsonl) if args.test_jsonl else None,
+        "enable_thinking": False,
+        "warmup_ratio": args.warmup_ratio,
         "training_examples": len(train_rows),
         "validation_examples": len(validation_rows),
         "scenario_leakage": False,
