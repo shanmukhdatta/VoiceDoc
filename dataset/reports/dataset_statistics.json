@@ -18,27 +18,27 @@
     }
   },
   "rag": {
-    "count": 40,
+    "count": 1520,
     "distributions": {
       "domain": {
-        "cardio": 2,
-        "diabetes": 2,
-        "digestive": 2,
-        "emergency": 6,
-        "first_aid": 4,
-        "hygiene": 2,
-        "illness": 4,
-        "maternal": 2,
-        "medication": 2,
-        "mental": 2,
-        "musculoskeletal": 2,
-        "nutrition": 2,
-        "prevention": 4,
-        "respiratory": 2,
-        "skin": 2
+        "cardio": 144,
+        "diabetes": 96,
+        "digestive": 102,
+        "emergency": 17,
+        "first_aid": 109,
+        "hygiene": 41,
+        "illness": 252,
+        "maternal": 260,
+        "medication": 43,
+        "mental": 101,
+        "musculoskeletal": 81,
+        "nutrition": 44,
+        "prevention": 89,
+        "respiratory": 81,
+        "skin": 60
       },
       "language": {
-        "en": 20,
+        "en": 1500,
         "te": 20
       }
     },
@@ -46,14 +46,14 @@
       "en": 1500,
       "te": 1500
     },
-    "remaining": 2960,
+    "remaining": 1480,
     "remaining_by_language": {
-      "en": 1480,
+      "en": 0,
       "te": 1480
     },
     "target": 3000
   },
-  "review_queue": 120,
+  "review_queue": 1600,
   "sft": {
     "capability_targets": {
       "clarify": 1500,
@@ -260,5 +260,5 @@
     }
   },
   "validation_errors": 0,
-  "verified_registry_sources": 20
+  "verified_registry_sources": 936
 }

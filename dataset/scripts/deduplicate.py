@@ -1,6 +1,7 @@
 """Report exact and character-trigram similarity. Never delete rows automatically."""
 import argparse
-from collections import defaultdict
+from collections import Counter, defaultdict
+from math import ceil
 import unicodedata
 
 from common import ROOT, SFT, RAG, read_rows, write_json
@@ -20,26 +21,50 @@ def item_text(row, field):
     return normalized(value)
 
 
+def trigrams(value):
+    return {value[j:j + 3] for j in range(len(value) - 2)}
+
+
+class SimilarityIndex:
+    def __init__(self, all_grams, threshold):
+        self.frequency = Counter(gram for grams in all_grams for gram in grams)
+        self.threshold = threshold
+        self.index = defaultdict(list)
+
+    def prefix(self, grams):
+        count = len(grams) - ceil(self.threshold * len(grams)) + 1
+        return sorted(grams, key=lambda gram: (self.frequency[gram], gram))[:count]
+
+    def similar(self, grams):
+        prefix = self.prefix(grams)
+        candidates = {i: prior for gram in prefix for i, prior in self.index[gram]}
+        for i, prior in sorted(candidates.items()):
+            small, large = sorted((len(grams), len(prior)))
+            if small / large < self.threshold:
+                continue
+            shared = len(grams & prior)
+            score = shared / (len(grams) + len(prior) - shared)
+            if score >= self.threshold:
+                yield i, score
+
+    def add(self, i, grams):
+        for gram in self.prefix(grams):
+            self.index[gram].append((i, grams))
+
+
 def duplicates(rows, field, threshold=.78):
-    index = defaultdict(list)
     exact = defaultdict(list)
     near = []
     ids = [row.get("id") or row["chunk_id"] for row in rows]
-    for i, row in enumerate(rows):
-        value = item_text(row, field)
+    values = [item_text(row, field) for row in rows]
+    all_grams = [trigrams(value) for value in values]
+    index = SimilarityIndex(all_grams, threshold)
+    for i, (value, grams) in enumerate(zip(values, all_grams)):
         exact[value].append(ids[i])
-        grams = {value[j:j + 3] for j in range(len(value) - 2)}
-        overlap = defaultdict(int)
-        for gram in grams:
-            for prior, prior_length in index[gram]:
-                overlap[prior, prior_length] += 1
-            index[gram].append((i, len(grams)))
-        for (prior, prior_length), shared in sorted(overlap.items()):
-            union = len(grams) + prior_length - shared
-            if shared / union >= threshold:
-                other = item_text(rows[prior], field)
-                if value != other:
-                    near.append({"ids": [ids[prior], ids[i]], "similarity": round(shared / union, 4)})
+        for prior, score in index.similar(grams):
+            if value != values[prior]:
+                near.append({"ids": [ids[prior], ids[i]], "similarity": round(score, 4)})
+        index.add(i, grams)
     return {"exact_groups": [group for group in exact.values() if len(group) > 1], "near_pairs": near}
 
 

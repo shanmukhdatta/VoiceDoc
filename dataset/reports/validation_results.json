@@ -1,6 +1,6 @@
 {
   "clinical_reviewed": 0,
-  "rag_checked": 40,
+  "rag_checked": 1520,
   "record_errors": 0,
   "semantic_verification": "requires qualified review",
   "sft_checked": 80,

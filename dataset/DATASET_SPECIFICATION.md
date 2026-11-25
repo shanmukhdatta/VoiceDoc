@@ -22,7 +22,7 @@ Capability codes are `general`, `symptom`, `emergency`, `grounded`, `clarify` an
 | Fields | Meaning |
 |---|---|
 | `chunk_id`, `source_id`, `publisher`, `title`, `domain`, `language` | Chunk identity, registry link, bibliographic fields, taxonomy and language |
-| `text`, `content_sha256` | Original factual restatement or AI-assisted Telugu rendering and SHA-256 of the exact UTF-8 text |
+| `text`, `content_sha256` | Original factual restatement, English archive extract, or AI-assisted Telugu rendering and SHA-256 of the exact UTF-8 text |
 | `source_url`, `section_locator`, `publication_date`, `license` | Traceability and scope. The date is null when a publication or revision date could not be established for the Summary. |
 | `translation_of` | English chunk ID for Telugu renderings |
 | `rights_verified`, `clinician_reviewed`, `reviewed_by` | Scoped rights finding and independent clinical approval |

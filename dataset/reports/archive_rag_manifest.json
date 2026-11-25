@@ -1,0 +1,29 @@
+{
+  "archive_snapshot_sha256": "cc339bb81eb924f03e2870a688c2dcec10dd1560154ffd7398a160f9058a36a8",
+  "archive_url": "https://medlineplus.gov/xml.html",
+  "counts_by_domain": {
+    "cardio": 142,
+    "diabetes": 94,
+    "digestive": 100,
+    "emergency": 11,
+    "first_aid": 105,
+    "hygiene": 39,
+    "illness": 248,
+    "maternal": 258,
+    "medication": 41,
+    "mental": 99,
+    "musculoskeletal": 79,
+    "nutrition": 42,
+    "prevention": 85,
+    "respiratory": 79,
+    "skin": 58
+  },
+  "method": "Extractive, non-overlapping sentences from the public-domain English Summary fields",
+  "new_english_chunks": 1480,
+  "source_topics": 916,
+  "trigram_near_duplicates_removed": 10,
+  "word_bounds": [
+    65,
+    185
+  ]
+}

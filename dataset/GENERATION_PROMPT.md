@@ -22,3 +22,11 @@ python3 dataset/scripts/extract_medlineplus.py \
 ```
 
 The extractor limits evidence to the English topic summaries and includes the publisher snapshot and summary hashes. Use the evidence locally to select exact sources and assign the appropriate project domain. Verify scope before appending registry entries and publishing original source-grounded candidates. Use stable facet keys for source topics with several independent passages. Recompute statistics after every batch to get exact remaining counts by capability, language style and corpus language.
+
+To reproduce the English extraction after preparing the local evidence file:
+
+```sh
+python3 dataset/scripts/build_archive_rag.py --evidence /path/to/local-medlineplus-evidence.jsonl
+```
+
+Then run the materialization and validation commands in the README. Source: MedlinePlus, National Library of Medicine.

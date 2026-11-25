@@ -1,6 +1,7 @@
 """Materialize independently authored candidate batches. No API calls."""
 import argparse
 import csv
+from itertools import chain
 from pathlib import Path
 import re
 
@@ -34,10 +35,13 @@ def chunk_key(topic, facet, language):
 def materialize(authoring=AUTHORING):
     registry = sources()
     rag = {}
-    for topic_value, english, telugu in cells(authoring / "rag.tsv"):
+    archive = authoring / "rag_archive_en.tsv"
+    authored = ((topic, (("en", en), ("te", te))) for topic, en, te in cells(authoring / "rag.tsv"))
+    extracted = ((topic, (("en", en),)) for topic, en in cells(archive)) if archive.is_file() else ()
+    for topic_value, passages in chain(authored, extracted):
         topic, facet = topic_key(topic_value)
         origin = registry["nlm-" + topic]
-        for language, passage in (("en", english), ("te", telugu)):
+        for language, passage in passages:
             key = chunk_key(topic, facet, language)
             if (topic, facet, language) in rag:
                 raise ValueError(f"Repeated chunk identity: {key}")
@@ -58,7 +62,7 @@ def materialize(authoring=AUTHORING):
         raise ValueError("Topic and facet slugs collide in a RAG chunk ID")
     for topic_value, scenario, capability, style, risk, user, answer, *tail in cells(authoring / "sft.tsv"):
         if len(tail) != (1 if capability == "multi" else 0):
-            raise ValueError(f"{topic}/{scenario}: unexpected conversation history")
+            raise ValueError(f"{topic_value}/{scenario}: unexpected conversation history")
         topic, facet = topic_key(topic_value)
         origin = registry["nlm-" + topic]
         scenario_id = f"{topic}-{slug(scenario)}"
@@ -117,10 +121,10 @@ def main():
     write_json(ROOT / "reports/generation_manifest.json", {
         "teacher": "ChatGPT in Codex Work Mode (GPT-6 family)",
         "teacher_snapshot": None,
-        "method": "Individually authored scenarios and factual bilingual passages; no API calls",
+        "method": "Individually authored SFT and bilingual seed passages, with extractive English archive passages when present",
         "batch_inputs": {
             name: digest((args.authoring / name).read_text(encoding="utf-8"))
-            for name in ("sft.tsv", "rag.tsv")
+            for name in ("sft.tsv", "rag.tsv", "rag_archive_en.tsv") if (args.authoring / name).is_file()
         },
         "registry_sha256": digest((ROOT / "sources/source_registry.json").read_text(encoding="utf-8")),
         "sft_records": len(sft), "rag_chunks": len(rag),
