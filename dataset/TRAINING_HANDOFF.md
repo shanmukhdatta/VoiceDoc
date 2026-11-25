@@ -4,14 +4,14 @@ Reference revision: `9983139cf469f1ab30cbb29d80841aa9fabc5a46`.
 
 | Input | Location | Count | Status |
 |---|---|---:|---|
-| SFT prompt/response JSONL | `dataset/sft/candidates/sft_complete.jsonl` | 60 | Review candidate |
-| SFT candidate splits | `dataset/sft/splits/{train,validation,test}.jsonl` | 48 / 8 / 4 | Review candidate |
-| RAG chunk JSONL | `dataset/rag/candidates/rag_complete.jsonl` | 30 | Review candidate |
-| RAG native-shaped source JSON | `dataset/rag/source_export/candidate_sources.json` | 30 | Review candidate |
-| Clinical review queue | `dataset/reports/medical_review_queue.jsonl` | 90 | Pending |
+| SFT prompt/response JSONL | `dataset/sft/candidates/sft_complete.jsonl` | 80 | Review candidate |
+| SFT candidate splits | `dataset/sft/splits/{train,validation,test}.jsonl` | 64 / 8 / 8 | Review candidate |
+| RAG chunk JSONL | `dataset/rag/candidates/rag_complete.jsonl` | 40 | Review candidate |
+| RAG native-shaped source JSON | `dataset/rag/source_export/candidate_sources.json` | 40 | Review candidate |
+| Clinical review queue | `dataset/reports/medical_review_queue.jsonl` | 120 | Pending |
 | Training and pack approvals | `dataset/sft/approved/`, `dataset/rag/approved/` | 0 | Awaiting documented approvals |
 
-The [schema](DATASET_SPECIFICATION.md) documents all fields. For continuing authoring, `dataset/sources/authoring/sft.tsv` has topic slug, scenario slug, capability, style, risk, utterance, final answer, and optional conversation history separated by pipes. History has three utterances separated by tildes. `rag.tsv` has topic slug, English text and Telugu text. Keep literal pipes and line breaks out of TSV cells. Current identities permit multiple SFT scenarios and one bilingual RAG passage per source slug. Extend the authoring schema with a stable facet ID before adding multiple chunks for a single source.
+The [schema](DATASET_SPECIFICATION.md) documents all fields. For continuing authoring, `dataset/sources/authoring/sft.tsv` has topic slug, scenario slug, capability, style, risk, utterance, final answer, and optional conversation history separated by pipes. History has three utterances separated by tildes. `rag.tsv` has topic slug, English text and Telugu text. Keep literal pipes and line breaks out of TSV cells. To add another bilingual RAG passage for the same source, use a stable `topic@facet` key in the RAG TSV. A grounded SFT example can use that same key to select its evidence. All examples from that source topic stay in one split group.
 
 ## Review and exports
 
@@ -65,4 +65,4 @@ python3 ml/training/train_qlora.py \
   --output-dir /kaggle/working/voicedoc-qlora --validate-only
 ```
 
-The candidate release has 9,940 SFT records and 2,970 RAG chunks remaining against the targets. Recover full desired topic, capability and language coverage, complete clinical and linguistic review, audit the pinned tokenizer and validate the approved export before any training or release use.
+The candidate release has 9,920 SFT records and 2,960 RAG chunks remaining against the targets. Recover full desired topic, capability and language coverage, complete clinical and linguistic review, audit the pinned tokenizer and validate the approved export before any training or release use.

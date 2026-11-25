@@ -34,6 +34,11 @@ class CandidateDatasetTest(unittest.TestCase):
             self.sft, self.rag, self.splits, self.registry,
             read_json(ROOT / "sources/license_manifest.json")))
 
+    def test_emergency_coverage_across_feasible_splits(self):
+        for name, rows in self.splits.items():
+            with self.subTest(split=name):
+                self.assertTrue(any(row["capability"] == "emergency" for row in rows))
+
     def test_existing_training_gate_rejects_every_candidate(self):
         for row in self.sft:
             with self.subTest(row=row["id"]), self.assertRaisesRegex(ValueError, "review"):

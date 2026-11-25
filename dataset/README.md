@@ -1,6 +1,6 @@
 # VoiceDoc dataset preparation
 
-This partial delivery contains **60 SFT candidates and 30 RAG candidates** across all 15 requested domains. Clinical approvals total zero. Use the candidates for review and dataset engineering. The unchanged repository gates require clinician approval before training or building a real knowledge pack.
+This partial delivery contains **80 SFT candidates and 40 RAG candidates** across all 15 requested domains. Clinical approvals total zero. Use the candidates for review and dataset engineering. The unchanged repository gates require clinician approval before training or building a real knowledge pack.
 
 | Contents | Path |
 |---|---|

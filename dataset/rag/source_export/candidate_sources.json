@@ -1,6 +1,48 @@
 [
   {
     "chunk_ids": [
+      "rag-anaphylaxis-en"
+    ],
+    "clinician_reviewed": false,
+    "content_sha256": "4d8f9a67a5c3d85afc819706dcc2e9aa9a2c5215829750fd20948f9d0093944a",
+    "language": "en",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "publication_date": null,
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "registry_source_id": "nlm-anaphylaxis",
+    "reviewed_by": null,
+    "rights_verified": true,
+    "section_locators": [
+      "Summary, retrieved line spans 44–57"
+    ],
+    "source_id": "nlm-anaphylaxis-en",
+    "source_url": "https://medlineplus.gov/anaphylaxis.html",
+    "text": "Anaphylaxis is a severe allergic reaction that can come on rapidly. Foods, medicines and insect stings are possible triggers. Signs can include hives, tongue swelling, throat tightness, difficulty swallowing, wheezing or fainting. The reaction can involve several parts of the body. Call local emergency services immediately when a severe allergic reaction is suspected. If the person has an epinephrine auto-injector for severe reactions, follow their emergency instructions and use it promptly.",
+    "title": "Anaphylaxis"
+  },
+  {
+    "chunk_ids": [
+      "rag-anaphylaxis-te"
+    ],
+    "clinician_reviewed": false,
+    "content_sha256": "988ac871177699796dcb7727c731e6bd7611d82071a078fed2d91bf358f4e9ef",
+    "language": "te",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "publication_date": null,
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "registry_source_id": "nlm-anaphylaxis",
+    "reviewed_by": null,
+    "rights_verified": true,
+    "section_locators": [
+      "Summary, retrieved line spans 44–57"
+    ],
+    "source_id": "nlm-anaphylaxis-te",
+    "source_url": "https://medlineplus.gov/anaphylaxis.html",
+    "text": "అనాఫైలాక్సిస్ అనేది వేగంగా మొదలయ్యే తీవ్రమైన అలర్జీ ప్రతిచర్య. ఆహారం, మందులు లేదా కీటకాలు కుట్టడం దీనికి కారణం కావచ్చు. దద్దుర్లు, నాలుక వాపు, గొంతు బిగుసుకుపోవడం, మింగడానికి ఇబ్బంది, ఊపిరి తీసుకునేటప్పుడు ఈల శబ్దం లేదా స్పృహ తప్పడం వంటి లక్షణాలు కనిపించవచ్చు. ఈ ప్రతిచర్య శరీరంలోని పలు భాగాలను ప్రభావితం చేయవచ్చు. తీవ్రమైన అలర్జీ అనుమానం ఉంటే వెంటనే స్థానిక అత్యవసర సేవలకు ఫోన్ చేయండి. ఆ వ్యక్తికి తీవ్రమైన అలర్జీ కోసం ఎపినెఫ్రిన్ ఆటో ఇంజెక్టర్ ఉంటే వారి అత్యవసర సూచనల ప్రకారం వెంటనే వాడండి.",
+    "title": "Anaphylaxis"
+  },
+  {
+    "chunk_ids": [
       "rag-antibiotics-en"
     ],
     "clinician_reviewed": false,
@@ -166,6 +208,48 @@
     "source_url": "https://medlineplus.gov/backpain.html",
     "text": "వెన్నునొప్పి మెల్లగా బాధ పెట్టే నొప్పిలా లేదా ఒక్కసారిగా వచ్చే తీవ్రమైన నొప్పిలా ఉండవచ్చు. అక్యూట్ వెన్నునొప్పి అకస్మాత్తుగా మొదలై సాధారణంగా కొన్ని రోజుల నుంచి కొన్ని వారాల వరకు ఉంటుంది. మూడు నెలల కంటే ఎక్కువగా ఉంటే దీర్ఘకాలిక వెన్నునొప్పి అంటారు. ఈ పేర్లు నొప్పి ఎంతకాలం ఉందో చెబుతాయి. కారణాన్ని నిర్ధారించవు. గాయం తర్వాత వెన్నునొప్పి వచ్చినా లేదా నొప్పి తీవ్రంగా ఉన్నా వైద్య సహాయం తీసుకోండి.",
     "title": "Back Pain"
+  },
+  {
+    "chunk_ids": [
+      "rag-burns-en"
+    ],
+    "clinician_reviewed": false,
+    "content_sha256": "94b4d2ac0bf3be6d46b04fc11d9fece6fb93756c581214ad0aca147d85da7e14",
+    "language": "en",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "publication_date": null,
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "registry_source_id": "nlm-burns",
+    "reviewed_by": null,
+    "rights_verified": true,
+    "section_locators": [
+      "Summary, retrieved line spans 76–85"
+    ],
+    "source_id": "nlm-burns-en",
+    "source_url": "https://medlineplus.gov/burns.html",
+    "text": "A burn can damage the skin and deeper tissues. Hot liquids, steam, chemicals, electricity and sunlight can all cause burns. Burn depth describes which layers are injured. A shallow burn affects the outer skin, while a very deep burn can reach the tissues beneath it. Swelling and blisters can occur. Clinicians consider the cause, depth and extent together when assessing a burn. Damage to the skin's protective barrier also increases the risk of infection.",
+    "title": "Burns"
+  },
+  {
+    "chunk_ids": [
+      "rag-burns-te"
+    ],
+    "clinician_reviewed": false,
+    "content_sha256": "2ef32d4bd7c2386c099e3809246a0e81fa83e1e60ebf5bd9b543afe7acd824ba",
+    "language": "te",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "publication_date": null,
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "registry_source_id": "nlm-burns",
+    "reviewed_by": null,
+    "rights_verified": true,
+    "section_locators": [
+      "Summary, retrieved line spans 76–85"
+    ],
+    "source_id": "nlm-burns-te",
+    "source_url": "https://medlineplus.gov/burns.html",
+    "text": "కాలిన గాయం చర్మాన్నీ, దాని కింద ఉన్న కణజాలాన్నీ దెబ్బతీయవచ్చు. వేడి ద్రవాలు, ఆవిరి, రసాయనాలు, విద్యుత్, ఎండ వల్ల ఇలాంటి గాయాలు రావచ్చు. గాయం ఎంత లోతుగా ఉందో అంటే చర్మంలోని ఏ పొరలు దెబ్బతిన్నాయో చూడడం. పైపొర వరకే గాయం ఉండవచ్చు. చాలా లోతైన గాయం చర్మం కింద కణజాలం వరకు వెళ్లవచ్చు. వాపు, నీటి బొబ్బలు రావచ్చు. గాయాన్ని అంచనా వేసేటప్పుడు కారణం, లోతు, ఎంత భాగానికి వ్యాపించిందో వైద్యులు చూస్తారు. చర్మం ఇచ్చే రక్షణ దెబ్బతినడం వల్ల ఇన్‌ఫెక్షన్ ప్రమాదం పెరుగుతుంది.",
+    "title": "Burns"
   },
   {
     "chunk_ids": [
@@ -379,6 +463,48 @@
   },
   {
     "chunk_ids": [
+      "rag-foodborneillness-en"
+    ],
+    "clinician_reviewed": false,
+    "content_sha256": "09bf077be8df44bb8ff5339e766a7d677c4c501089735b19241581cbccf1d7d1",
+    "language": "en",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "publication_date": null,
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "registry_source_id": "nlm-foodborneillness",
+    "reviewed_by": null,
+    "rights_verified": true,
+    "section_locators": [
+      "Summary, retrieved line spans 76–96"
+    ],
+    "source_id": "nlm-foodborneillness-en",
+    "source_url": "https://medlineplus.gov/foodborneillness.html",
+    "text": "Foodborne illness can follow eating contaminated food. Bacteria and viruses are common causes. Parasites or harmful chemicals can also be responsible. Symptoms vary and may include cramps, nausea, vomiting, diarrhea or fever. Food may become contaminated before it reaches the kitchen as well as during preparation or storage. Fluid and electrolyte loss can lead to dehydration, and serious illness may require treatment in a hospital.",
+    "title": "Foodborne Illness"
+  },
+  {
+    "chunk_ids": [
+      "rag-foodborneillness-te"
+    ],
+    "clinician_reviewed": false,
+    "content_sha256": "e5256cb860e72fea97bf892749123c89961333dee27349e5b702aaa230905c6c",
+    "language": "te",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "publication_date": null,
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "registry_source_id": "nlm-foodborneillness",
+    "reviewed_by": null,
+    "rights_verified": true,
+    "section_locators": [
+      "Summary, retrieved line spans 76–96"
+    ],
+    "source_id": "nlm-foodborneillness-te",
+    "source_url": "https://medlineplus.gov/foodborneillness.html",
+    "text": "కలుషితమైన ఆహారం తింటే అనారోగ్యం రావచ్చు. బ్యాక్టీరియా, వైరస్‌లు సాధారణ కారణాలు. కొన్ని సందర్భాల్లో పరాన్నజీవులు లేదా హానికరమైన రసాయనాలు కారణం కావచ్చు. లక్షణాలు మారవచ్చు. కడుపు మెలిపెట్టినట్టు నొప్పి, వికారం, వాంతులు, విరేచనాలు లేదా జ్వరం రావచ్చు. ఆహారం వంటగదికి చేరేలోపే కలుషితం కావచ్చు. వండేటప్పుడు లేదా నిల్వ చేసేటప్పుడు కూడా ఇలా జరగవచ్చు. ద్రవాలు, లవణాలు కోల్పోతే డీహైడ్రేషన్ రావచ్చు. అనారోగ్యం తీవ్రమైతే ఆసుపత్రిలో చికిత్స అవసరం కావచ్చు.",
+    "title": "Foodborne Illness"
+  },
+  {
+    "chunk_ids": [
       "rag-foodsafety-en"
     ],
     "clinician_reviewed": false,
@@ -418,6 +544,90 @@
     "source_url": "https://medlineplus.gov/foodsafety.html",
     "text": "ఇంట్లో ఆహారం వల్ల వచ్చే అనారోగ్యాన్ని తగ్గించడానికి చేతులు, పండ్లు, కూరగాయలు, వంట పాత్రలు, వంట చేసే బల్లను శుభ్రంగా ఉంచండి. క్రిములు ఒక ఆహారం నుంచి మరో ఆహారానికి చేరకుండా పచ్చి పదార్థాలను విడిగా ఉంచండి. ఆహారాన్ని పూర్తిగా ఉడికించండి. త్వరగా పాడయ్యే పదార్థాలను ఆలస్యం చేయకుండా ఫ్రిజ్‌లో పెట్టండి. దుకాణంలో డబ్బాలు ఉబ్బి ఉంటే, లేదా సీసా పగిలి ఉన్నా మూత వదులుగా ఉన్నా కొనకండి.",
     "title": "Food Safety"
+  },
+  {
+    "chunk_ids": [
+      "rag-healthscreening-en"
+    ],
+    "clinician_reviewed": false,
+    "content_sha256": "79c8aef38d04ef2fd423bd92f52d80f4ab93ddc8a71f7c226d0b461c89a698e4",
+    "language": "en",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "publication_date": null,
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "registry_source_id": "nlm-healthscreening",
+    "reviewed_by": null,
+    "rights_verified": true,
+    "section_locators": [
+      "Summary, retrieved line spans 76–92"
+    ],
+    "source_id": "nlm-healthscreening-en",
+    "source_url": "https://medlineplus.gov/healthscreening.html",
+    "text": "Screening uses tests to look for a condition before symptoms appear. Finding a condition early can help with treatment. A screening test can be done in a routine clinic or at a separate facility when special equipment is needed. The tests a person needs depend on factors such as age, sex, family history and other risks. After the test, ask when the results will be available and who can explain them.",
+    "title": "Health Screening"
+  },
+  {
+    "chunk_ids": [
+      "rag-healthscreening-te"
+    ],
+    "clinician_reviewed": false,
+    "content_sha256": "1bcdf55b7b656165ef5e00c3f26aa66413d237642bd7a70d8568b0f841141d9e",
+    "language": "te",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "publication_date": null,
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "registry_source_id": "nlm-healthscreening",
+    "reviewed_by": null,
+    "rights_verified": true,
+    "section_locators": [
+      "Summary, retrieved line spans 76–92"
+    ],
+    "source_id": "nlm-healthscreening-te",
+    "source_url": "https://medlineplus.gov/healthscreening.html",
+    "text": "లక్షణాలు కనిపించకముందే ఆరోగ్య సమస్య ఉందేమో చూడటానికి చేసే పరీక్షలను స్క్రీనింగ్ అంటారు. సమస్యను తొందరగా గుర్తించడం చికిత్సకు ఉపయోగపడవచ్చు. కొన్ని పరీక్షలు సాధారణ క్లినిక్‌లో చేయవచ్చు. ప్రత్యేక పరికరాలు అవసరమైతే మరో కేంద్రానికి వెళ్లాల్సి రావచ్చు. ఏ పరీక్షలు అవసరమో వయసు, లింగం, కుటుంబ ఆరోగ్య చరిత్ర, ఇతర ప్రమాద కారకాలపై ఆధారపడుతుంది. పరీక్ష తర్వాత ఫలితాలు ఎప్పుడు వస్తాయో, వాటిని ఎవరు వివరించగలరో అడగండి.",
+    "title": "Health Screening"
+  },
+  {
+    "chunk_ids": [
+      "rag-heartattack-en"
+    ],
+    "clinician_reviewed": false,
+    "content_sha256": "7ce4f6a4ae337c97b6389ce4cf7508c461f241e3a6afd395983547a724c7ac82",
+    "language": "en",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "publication_date": null,
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "registry_source_id": "nlm-heartattack",
+    "reviewed_by": null,
+    "rights_verified": true,
+    "section_locators": [
+      "Summary, retrieved line spans 82–118"
+    ],
+    "source_id": "nlm-heartattack-en",
+    "source_url": "https://medlineplus.gov/heartattack.html",
+    "text": "A heart attack occurs when blood flow to heart muscle is suddenly blocked. Symptoms can differ between people. Chest pressure or discomfort may come and go. Shortness of breath, cold sweating or discomfort in an arm, the jaw or the back may also occur. Symptoms can feel less severe than someone expects. If symptoms suggest a possible heart attack, call local emergency services immediately, even if you are unsure of the cause.",
+    "title": "Heart Attack"
+  },
+  {
+    "chunk_ids": [
+      "rag-heartattack-te"
+    ],
+    "clinician_reviewed": false,
+    "content_sha256": "ae26c75ce4939f2aee35eb80af7d329aebe287d04ccbb0ff70d67512340404ee",
+    "language": "te",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "publication_date": null,
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "registry_source_id": "nlm-heartattack",
+    "reviewed_by": null,
+    "rights_verified": true,
+    "section_locators": [
+      "Summary, retrieved line spans 82–118"
+    ],
+    "source_id": "nlm-heartattack-te",
+    "source_url": "https://medlineplus.gov/heartattack.html",
+    "text": "గుండె కండరానికి రక్త సరఫరా ఒక్కసారిగా ఆగిపోతే గుండెపోటు రావచ్చు. లక్షణాలు అందరిలో ఒకేలా ఉండవు. ఛాతీలో ఒత్తిడి లేదా అసౌకర్యం తగ్గి మళ్లీ రావచ్చు. ఊపిరి అందకపోవడం, చల్లని చెమట పట్టడం, చేయి, దవడ లేదా వీపులో అసౌకర్యం కూడా ఉండవచ్చు. కొందరికి లక్షణాలు ఊహించినంత తీవ్రంగా అనిపించకపోవచ్చు. గుండెపోటు అనుమానం వస్తే కారణం కచ్చితంగా తెలియకపోయినా వెంటనే స్థానిక అత్యవసర సేవలకు ఫోన్ చేయండి.",
+    "title": "Heart Attack"
   },
   {
     "chunk_ids": [

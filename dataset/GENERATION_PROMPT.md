@@ -9,3 +9,16 @@ Use supplied passages for grounded examples. Include examples with conflicting c
 For RAG, draft one coherent English passage per topic facet and an equivalent Telugu passage. Preserve quantities, negations, conditional statements and urgency. Prefer 100–250 model tokens when appropriate. If a source excerpt contains a country-specific number, use verified local guidance for that audience or phrase the action as calling their local emergency services.
 
 Append accepted records to the authoring TSV inputs described in the handoff. Record batch-level source and teacher details for subsequent releases. Run structural and tokenizer checks, inspect near-matches, then review new claims and translation fidelity against the cited source. Capture failures and edit or remove the affected rows. Record qualified review separately. Maintain a factual account of completed records and shortfalls.
+
+## Add source evidence at scale
+
+Download the official Health Topic archive from [MedlinePlus XML files](https://medlineplus.gov/xml.html). Use the extractor with an actual local publisher snapshot and the date of access.
+
+```sh
+python3 dataset/scripts/extract_medlineplus.py \
+  --input /path/to/medlineplus-health-topic.zip \
+  --output /path/to/local-medlineplus-evidence.jsonl \
+  --access-date YYYY-MM-DD
+```
+
+The extractor limits evidence to the English topic summaries and includes the publisher snapshot and summary hashes. Use the evidence locally to select exact sources and assign the appropriate project domain. Verify scope before appending registry entries and publishing original source-grounded candidates. Use stable facet keys for source topics with several independent passages. Recompute statistics after every batch to get exact remaining counts by capability, language style and corpus language.

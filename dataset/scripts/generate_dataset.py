@@ -21,31 +21,46 @@ def slug(value):
     return value
 
 
+def topic_key(value):
+    topic, separator, facet = value.partition("@")
+    return slug(topic), slug(facet) if separator else ""
+
+
+def chunk_key(topic, facet, language):
+    stem = f"{topic}-{facet}" if facet else topic
+    return f"rag-{stem}-{language}"
+
+
 def materialize(authoring=AUTHORING):
     registry = sources()
     rag = {}
-    for topic, english, telugu in cells(authoring / "rag.tsv"):
-        origin = registry["nlm-" + slug(topic)]
+    for topic_value, english, telugu in cells(authoring / "rag.tsv"):
+        topic, facet = topic_key(topic_value)
+        origin = registry["nlm-" + topic]
         for language, passage in (("en", english), ("te", telugu)):
-            key = f"rag-{topic}-{language}"
-            if (topic, language) in rag:
+            key = chunk_key(topic, facet, language)
+            if (topic, facet, language) in rag:
                 raise ValueError(f"Repeated chunk identity: {key}")
-            rag[topic, language] = {
+            rag[topic, facet, language] = {
                 "chunk_id": key, "source_id": origin["source_id"], "publisher": origin["publisher"],
                 "title": origin["title"], "domain": origin["domain"], "language": language,
                 "text": passage, "source_url": origin["url"], "section_locator": origin["section_locator"],
                 "publication_date": origin["publication_date"], "license": origin["license"],
                 "content_sha256": digest(passage), "rights_verified": bool(has_rights(origin)),
                 "clinician_reviewed": False, "reviewed_by": None, "translation_of":
-                f"rag-{topic}-en" if language == "te" else None,
+                chunk_key(topic, facet, "en") if language == "te" else None,
             }
 
     sft = []
     identities = set()
-    for topic, scenario, capability, style, risk, user, answer, *tail in cells(authoring / "sft.tsv"):
+    chunk_ids = [row["chunk_id"] for row in rag.values()]
+    if len(chunk_ids) != len(set(chunk_ids)):
+        raise ValueError("Topic and facet slugs collide in a RAG chunk ID")
+    for topic_value, scenario, capability, style, risk, user, answer, *tail in cells(authoring / "sft.tsv"):
         if len(tail) != (1 if capability == "multi" else 0):
             raise ValueError(f"{topic}/{scenario}: unexpected conversation history")
-        origin = registry["nlm-" + slug(topic)]
+        topic, facet = topic_key(topic_value)
+        origin = registry["nlm-" + topic]
         scenario_id = f"{topic}-{slug(scenario)}"
         key = f"sft-{scenario_id}-{style}"
         if key in identities:
@@ -61,7 +76,7 @@ def materialize(authoring=AUTHORING):
             "rights_verified": bool(has_rights(origin)), "clinician_reviewed": False, "reviewed_by": None,
         }
         if capability == "grounded":
-            evidence = rag[topic, "en" if style == "translit" else lang]
+            evidence = rag[topic, facet, "en" if style == "translit" else lang]
             record["evidence_chunk_ids"] = [evidence["chunk_id"]]
             record["prompt"] = f"{context_label}: {evidence['text']}\n\n{user_label}: {user}"
         if capability == "multi":
@@ -87,6 +102,18 @@ def main():
     sft, rag = materialize(args.authoring)
     for path, rows in ((SFT, sft), (RAG, rag)):
         write_rows(path, rows)
+    taxonomy = {}
+    for row in sft:
+        topic = row["split_group"]
+        scenario = row["scenario_id"][len(topic) + 1:]
+        metadata = taxonomy.setdefault(topic, {}).setdefault(scenario, {
+            "primary_capability": row["capability"], "risk_level": row["risk_level"],
+            "language_styles": [],
+        })
+        if metadata["primary_capability"] != row["capability"] or metadata["risk_level"] != row["risk_level"]:
+            raise ValueError(f"{row['scenario_id']}: inconsistent scenario metadata")
+        metadata["language_styles"].append(row["language_style"])
+    write_json(ROOT / "taxonomy/scenario_taxonomy.json", taxonomy)
     write_json(ROOT / "reports/generation_manifest.json", {
         "teacher": "ChatGPT in Codex Work Mode (GPT-6 family)",
         "teacher_snapshot": None,

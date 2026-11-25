@@ -33,6 +33,17 @@ def split(rows, seed=42):
     totals = profile(rows)
     assigned = {name: [] for name in RATIOS}
     current = {name: Counter() for name in RATIOS}
+    emergency = [key for key in order if any(row["capability"] == "emergency" for row in groups[key])]
+    held_out_capacity = round(len(rows) * RATIOS["test"])
+    eligible = [key for key in emergency if len(groups[key]) <= held_out_capacity]
+    if len(emergency) >= 3 and len(eligible) >= 2:
+        eligible.sort(key=lambda key: (len(groups[key]), profile(groups[key])["capability:emergency"]))
+        anchors = {"validation": eligible[0], "test": eligible[1]}
+        anchors["train"] = next(key for key in emergency if key not in anchors.values())
+        for name, key in anchors.items():
+            assigned[name].extend(groups[key])
+            current[name].update(profile(groups[key]))
+        order = [key for key in order if key not in anchors.values()]
     for i, key in enumerate(order):
         batch = profile(groups[key])
         available = [name for name, values in assigned.items() if not values]

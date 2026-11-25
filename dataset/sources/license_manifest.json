@@ -16,7 +16,12 @@
     "nlm-antibiotics",
     "nlm-prenatalcare",
     "nlm-vaccines",
-    "nlm-stroke"
+    "nlm-stroke",
+    "nlm-burns",
+    "nlm-heartattack",
+    "nlm-foodborneillness",
+    "nlm-anaphylaxis",
+    "nlm-healthscreening"
   ],
   "permitted_usage": [
     "extract_facts",

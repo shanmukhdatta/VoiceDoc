@@ -328,5 +328,115 @@
     ],
     "rights_verified": true,
     "hash_scope": "Retrieved web text of cited Summary spans, joined with LF, no terminal LF. Not a hash of HTML or the complete Summary."
+  },
+  {
+    "source_id": "nlm-burns",
+    "domain": "first_aid",
+    "title": "Burns",
+    "url": "https://medlineplus.gov/burns.html",
+    "section_locator": "Summary, retrieved line spans 76–85",
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "access_date": "2026-11-25",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "license_evidence": "https://medlineplus.gov/about/using/usingcontent/",
+    "permitted_usage": [
+      "extract_facts",
+      "adapt",
+      "translate",
+      "machine_learning",
+      "redistribute"
+    ],
+    "rights_verified": true,
+    "hash_scope": "Retrieved web text of cited Summary spans, joined with LF, no terminal LF. Not a hash of HTML or the complete Summary.",
+    "content_sha256": "bfb8882c180933e3996abb17b99d2d19a3fa1eee7448797a025d2befe0913727",
+    "publication_date": null
+  },
+  {
+    "source_id": "nlm-heartattack",
+    "domain": "emergency",
+    "title": "Heart Attack",
+    "url": "https://medlineplus.gov/heartattack.html",
+    "section_locator": "Summary, retrieved line spans 82–118",
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "access_date": "2026-11-25",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "license_evidence": "https://medlineplus.gov/about/using/usingcontent/",
+    "permitted_usage": [
+      "extract_facts",
+      "adapt",
+      "translate",
+      "machine_learning",
+      "redistribute"
+    ],
+    "rights_verified": true,
+    "hash_scope": "Retrieved web text of cited Summary spans, joined with LF, no terminal LF. Not a hash of HTML or the complete Summary.",
+    "content_sha256": "87b1e91df5c94c9304918dc82c4b722d2e5cd3b538ab8d225c09a83d3bd4f549",
+    "publication_date": null
+  },
+  {
+    "source_id": "nlm-foodborneillness",
+    "domain": "illness",
+    "title": "Foodborne Illness",
+    "url": "https://medlineplus.gov/foodborneillness.html",
+    "section_locator": "Summary, retrieved line spans 76–96",
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "access_date": "2026-11-25",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "license_evidence": "https://medlineplus.gov/about/using/usingcontent/",
+    "permitted_usage": [
+      "extract_facts",
+      "adapt",
+      "translate",
+      "machine_learning",
+      "redistribute"
+    ],
+    "rights_verified": true,
+    "hash_scope": "Retrieved web text of cited Summary spans, joined with LF, no terminal LF. Not a hash of HTML or the complete Summary.",
+    "content_sha256": "eba1b045b39f80393583927825d24aeb2206776cad56df0241f1193e4f294cba",
+    "publication_date": null
+  },
+  {
+    "source_id": "nlm-anaphylaxis",
+    "domain": "emergency",
+    "title": "Anaphylaxis",
+    "url": "https://medlineplus.gov/anaphylaxis.html",
+    "section_locator": "Summary, retrieved line spans 44–57",
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "access_date": "2026-11-25",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "license_evidence": "https://medlineplus.gov/about/using/usingcontent/",
+    "permitted_usage": [
+      "extract_facts",
+      "adapt",
+      "translate",
+      "machine_learning",
+      "redistribute"
+    ],
+    "rights_verified": true,
+    "hash_scope": "Retrieved web text of cited Summary spans, joined with LF, no terminal LF. Not a hash of HTML or the complete Summary.",
+    "content_sha256": "0d049373dbd67f9d6bdc97260f6ba862b9ff113d96e1ec4e47c4f210355c25c4",
+    "publication_date": null
+  },
+  {
+    "source_id": "nlm-healthscreening",
+    "domain": "prevention",
+    "title": "Health Screening",
+    "url": "https://medlineplus.gov/healthscreening.html",
+    "section_locator": "Summary, retrieved line spans 76–92",
+    "publisher": "U.S. National Library of Medicine (MedlinePlus)",
+    "access_date": "2026-11-25",
+    "license": "MedlinePlus public-domain health-topic summary (U.S.)",
+    "license_evidence": "https://medlineplus.gov/about/using/usingcontent/",
+    "permitted_usage": [
+      "extract_facts",
+      "adapt",
+      "translate",
+      "machine_learning",
+      "redistribute"
+    ],
+    "rights_verified": true,
+    "hash_scope": "Retrieved web text of cited Summary spans, joined with LF, no terminal LF. Not a hash of HTML or the complete Summary.",
+    "content_sha256": "ba0229a9ca5fa61f9a63b6335a8e4dbb9616c0376dbd8097fd05f099393581f5",
+    "publication_date": null
   }
 ]

@@ -1,330 +1,600 @@
 {
+  "anaphylaxis": {
+    "dizziness-alone": {
+      "language_styles": [
+        "telugu"
+      ],
+      "primary_capability": "clarify",
+      "risk_level": "moderate"
+    },
+    "tight-throat-after-sting": {
+      "language_styles": [
+        "english"
+      ],
+      "primary_capability": "emergency",
+      "risk_level": "high"
+    },
+    "tongue-wheezing": {
+      "language_styles": [
+        "telugu"
+      ],
+      "primary_capability": "emergency",
+      "risk_level": "high"
+    },
+    "trigger-explanation": {
+      "language_styles": [
+        "english"
+      ],
+      "primary_capability": "grounded",
+      "risk_level": "low"
+    }
+  },
   "antibiotics": {
     "borrowed-doses": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "general",
       "risk_level": "moderate"
     },
     "mucus-color": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "grounded",
       "risk_level": "low"
     },
     "resistance-explanation": {
-      "observed_language_style": "code",
+      "language_styles": [
+        "code"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     },
     "side-effect-call": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "symptom",
       "risk_level": "moderate"
     }
   },
   "anxiety": {
     "exam-day": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     },
     "heart-racing": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "clarify",
       "risk_level": "moderate"
     },
     "persistent-interference": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "multi",
       "risk_level": "moderate"
     },
     "when-support": {
-      "observed_language_style": "translit",
+      "language_styles": [
+        "translit"
+      ],
       "primary_capability": "grounded",
       "risk_level": "low"
     }
   },
   "asthma": {
     "night-cough": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "multi",
       "risk_level": "moderate"
     },
     "rescue-not-working": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "emergency",
       "risk_level": "high"
     },
     "spirometry-purpose": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "grounded",
       "risk_level": "low"
     },
     "triggers-differ": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     }
   },
   "backpain": {
     "chronic-timing": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "grounded",
       "risk_level": "low"
     },
     "pain-timing-question": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "clarify",
       "risk_level": "moderate"
     },
     "post-injury": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "symptom",
       "risk_level": "moderate"
     },
     "sharp-or-dull": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     }
   },
+  "burns": {
+    "blister-question": {
+      "language_styles": [
+        "telugu"
+      ],
+      "primary_capability": "symptom",
+      "risk_level": "moderate"
+    },
+    "scald-language": {
+      "language_styles": [
+        "english"
+      ],
+      "primary_capability": "general",
+      "risk_level": "low"
+    },
+    "size-perspective": {
+      "language_styles": [
+        "english"
+      ],
+      "primary_capability": "grounded",
+      "risk_level": "moderate"
+    },
+    "unspecified-cause": {
+      "language_styles": [
+        "translit"
+      ],
+      "primary_capability": "clarify",
+      "risk_level": "moderate"
+    }
+  },
   "commoncold": {
     "ambiguous-sneeze": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "clarify",
       "risk_level": "low"
     },
     "course": {
-      "observed_language_style": "code",
+      "language_styles": [
+        "code"
+      ],
       "primary_capability": "grounded",
       "risk_level": "low"
     },
     "nose-throat": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     },
     "returning-cough": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "symptom",
       "risk_level": "moderate"
     }
   },
   "constipation": {
     "medicine-effect": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "clarify",
       "risk_level": "moderate"
     },
     "normal-frequency": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     },
     "preventive-habits": {
-      "observed_language_style": "translit",
+      "language_styles": [
+        "translit"
+      ],
       "primary_capability": "grounded",
       "risk_level": "low"
     },
     "straining": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "symptom",
       "risk_level": "moderate"
     }
   },
   "dehydration": {
     "confusion-after-loss": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "emergency",
       "risk_level": "high"
     },
     "fluid-balance": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     },
     "heat-and-urine": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "symptom",
       "risk_level": "moderate"
     },
     "tearless-child": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "symptom",
       "risk_level": "moderate"
     }
   },
   "diabetestype2": {
     "insulin-explanation": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     },
     "longterm": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "grounded",
       "risk_level": "low"
     },
     "mechanism-followup": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "multi",
       "risk_level": "low"
     },
     "one-claim": {
-      "observed_language_style": "translit",
+      "language_styles": [
+        "translit"
+      ],
       "primary_capability": "clarify",
       "risk_level": "moderate"
     }
   },
   "eczema": {
     "child-adult": {
-      "observed_language_style": "code",
+      "language_styles": [
+        "code"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     },
     "contagion": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     },
     "irritant-history": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "multi",
       "risk_level": "low"
     },
     "scratch-cycle": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "symptom",
       "risk_level": "low"
     }
   },
+  "foodborneillness": {
+    "contaminated-before-home": {
+      "language_styles": [
+        "english"
+      ],
+      "primary_capability": "general",
+      "risk_level": "low"
+    },
+    "hydration-followup": {
+      "language_styles": [
+        "code"
+      ],
+      "primary_capability": "multi",
+      "risk_level": "moderate"
+    },
+    "no-cause-from-cramps": {
+      "language_styles": [
+        "english"
+      ],
+      "primary_capability": "clarify",
+      "risk_level": "moderate"
+    },
+    "no-diarrhea-yet": {
+      "language_styles": [
+        "telugu"
+      ],
+      "primary_capability": "symptom",
+      "risk_level": "moderate"
+    }
+  },
   "foodsafety": {
     "bulging-can": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     },
     "raw-prep": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     },
     "rinsed-vegetables": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "grounded",
       "risk_level": "low"
     },
     "storage-kind": {
-      "observed_language_style": "translit",
+      "language_styles": [
+        "translit"
+      ],
       "primary_capability": "clarify",
+      "risk_level": "low"
+    }
+  },
+  "healthscreening": {
+    "after-screening": {
+      "language_styles": [
+        "english"
+      ],
+      "primary_capability": "grounded",
+      "risk_level": "low"
+    },
+    "family-history": {
+      "language_styles": [
+        "telugu"
+      ],
+      "primary_capability": "multi",
+      "risk_level": "low"
+    },
+    "screening-site": {
+      "language_styles": [
+        "code"
+      ],
+      "primary_capability": "clarify",
+      "risk_level": "low"
+    },
+    "screening-without-symptoms": {
+      "language_styles": [
+        "english"
+      ],
+      "primary_capability": "general",
+      "risk_level": "low"
+    }
+  },
+  "heartattack": {
+    "jaw-and-breath": {
+      "language_styles": [
+        "telugu"
+      ],
+      "primary_capability": "emergency",
+      "risk_level": "high"
+    },
+    "mechanism": {
+      "language_styles": [
+        "english"
+      ],
+      "primary_capability": "general",
+      "risk_level": "low"
+    },
+    "returned-pressure": {
+      "language_styles": [
+        "english"
+      ],
+      "primary_capability": "emergency",
+      "risk_level": "high"
+    },
+    "severity-myth": {
+      "language_styles": [
+        "telugu"
+      ],
+      "primary_capability": "grounded",
       "risk_level": "low"
     }
   },
   "highbloodpressure": {
     "between-beats": {
-      "observed_language_style": "code",
+      "language_styles": [
+        "code"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     },
     "conflicting-evidence": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "grounded",
       "risk_level": "moderate"
     },
     "reading-order": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     },
     "single-diagnosis": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "clarify",
       "risk_level": "moderate"
     }
   },
   "prenatalcare": {
     "definition": {
-      "observed_language_style": "translit",
+      "language_styles": [
+        "translit"
+      ],
       "primary_capability": "grounded",
       "risk_level": "low"
     },
     "questions-during-visit": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "multi",
       "risk_level": "low"
     },
     "visit-count": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "clarify",
       "risk_level": "low"
     },
     "visit-purpose": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     }
   },
   "sprainsandstrains": {
     "pop-history": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "multi",
       "risk_level": "moderate"
     },
     "spasm-evidence": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "grounded",
       "risk_level": "low"
     },
     "swelling-after-sport": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "symptom",
       "risk_level": "moderate"
     },
     "tissue-identification": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     }
   },
   "stroke": {
     "dispatch-uncertainty": {
-      "observed_language_style": "code",
+      "language_styles": [
+        "code"
+      ],
       "primary_capability": "emergency",
       "risk_level": "high"
     },
     "facial-droop": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "emergency",
       "risk_level": "high"
     },
     "sudden-balance": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "emergency",
       "risk_level": "high"
     },
     "sudden-vision": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "emergency",
       "risk_level": "high"
     }
   },
   "vaccines": {
     "mechanism-followup": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "multi",
       "risk_level": "low"
     },
     "oral-route": {
-      "observed_language_style": "english",
+      "language_styles": [
+        "english"
+      ],
       "primary_capability": "general",
       "risk_level": "low"
     },
     "specific-vaccine": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "clarify",
       "risk_level": "low"
     },
     "unsupported-schedule": {
-      "observed_language_style": "telugu",
+      "language_styles": [
+        "telugu"
+      ],
       "primary_capability": "grounded",
       "risk_level": "low"
     }
