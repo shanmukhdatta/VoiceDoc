@@ -1,0 +1,28 @@
+{
+  "policy_url": "https://medlineplus.gov/about/using/usingcontent/",
+  "scope": "Only the designated Health Topics Summary sections. This release publishes original factual restatements and synthetic conversations. It excludes page images, linked works, Medical Encyclopedia content and source excerpts. The public-domain designation is stated under U.S. law.",
+  "source_ids": [
+    "nlm-foodsafety",
+    "nlm-commoncold",
+    "nlm-asthma",
+    "nlm-constipation",
+    "nlm-eczema",
+    "nlm-dehydration",
+    "nlm-diabetestype2",
+    "nlm-highbloodpressure",
+    "nlm-backpain",
+    "nlm-anxiety",
+    "nlm-sprainsandstrains",
+    "nlm-antibiotics",
+    "nlm-prenatalcare",
+    "nlm-vaccines",
+    "nlm-stroke"
+  ],
+  "permitted_usage": [
+    "extract_facts",
+    "adapt",
+    "translate",
+    "machine_learning",
+    "redistribute"
+  ]
+}
