@@ -10,7 +10,7 @@ The audited release has 60 SFT candidates and 30 RAG chunks. The requested total
 | Split integrity | All 60 SFT rows assigned once. No shared topic or scenario IDs across the 48/8/4 split. The test has one topic, so it cannot measure full-domain performance. |
 | Native gate compatibility | Fifteen existing preparation, training and RAG unit tests passed. Five dataset integration tests passed. All candidate SFT and source-level RAG rows were rejected by the expected native clinician-review gates. |
 | Language checks | Unicode script patterns and Arabic-digit sequence agreement checked. Telugu wording, spelled-out quantities, register and negations need qualified linguistic review. |
-| Medical assessment | Same-session source checks during authoring. Six emergency SFT responses passed immediate-action heuristics. No independent AI verification or qualified clinical assessment. |
+| Medical assessment | Same-session source checks during authoring. Six emergency SFT responses passed immediate-action heuristics. Qualified clinical assessment is pending. The project owner reported a satisfactory [agent review](agent_review.md). |
 | Qwen3 tokenization | Validator support is present. The exact tokenizer audit remains pending because pinned assets and Transformers were unavailable in the execution environment. |
 | Rejections | The final structural pass recorded zero rejections. Draft edits made during authoring were not tracked as independent records. |
 | Approval | All 90 candidates have `clinician_reviewed: false` and `reviewed_by: null`. There are no approved training records or approved RAG chunks. |
