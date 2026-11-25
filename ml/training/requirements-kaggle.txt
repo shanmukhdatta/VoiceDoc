@@ -1,0 +1,6 @@
+# Kaggle supplies the CUDA-enabled PyTorch build; retain and record that exact version.
+# Install after checking CUDA/PyTorch compatibility in the active Kaggle image.
+transformers==4.52.2
+peft==0.15.2
+bitsandbytes==0.45.5
+accelerate==1.7.0

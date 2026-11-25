@@ -1,0 +1,15 @@
+{
+  "batch_inputs": {
+    "rag.tsv": "55eb45e837164172e4dc6a64f0c2fd659742b788c073ae21ce187d7b4ae38993",
+    "rag_archive_en.tsv": "e04bc89adc20b1c42eea2947aa3fd3128e9710ba09a346c2e973e2eb23a8b91f",
+    "sft.tsv": "a4553b28375e8c77c93ec2c97cd4d485977edc44745ad3be4d93f5c57bd08734"
+  },
+  "method": "Individually authored SFT and bilingual seed passages, with extractive English archive passages when present",
+  "rag_chunks": 1520,
+  "rag_rows_sha256": "efdf6518782a54ff34445c015c8f28d61be8b6317ebc962d1df6fc797d69e0b2",
+  "registry_sha256": "9bfb75e9ab0142c557fa477c0017841f81957c2af7b2f3946a545c0b4b90cc6e",
+  "sft_records": 80,
+  "sft_rows_sha256": "24c5e459dcede6f95abd7e75403e03efee14281ee9c12353c49a01278362c440",
+  "teacher": "ChatGPT in Codex Work Mode (GPT-6 family)",
+  "teacher_snapshot": null
+}

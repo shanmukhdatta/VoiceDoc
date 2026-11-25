@@ -1,5 +1,10 @@
 # Voice Doctor AI
 
+> **Current initial-release language scope: English and Telugu only.** Mentions of Tamil below describe possible future research, NOT a feature in this release.
+>
+> **Implementation status (November 26, 2026):** The consolidated `main` codebase includes the Qwen3-0.6B QLoRA training & merge pipeline (`ml/training/`), LiteRT-LM / GGUF conversion (`ml/preparation/convert_qwen3_litertlm.py`), multilingual-E5-small ONNX export & Android Unigram tokenizer (`E5UnigramTokenizer.kt`), SQLite FTS5 + vector hybrid RAG (`rag/ingestion/build_pack.py`, `SqliteHybridRetriever.kt`), `VoiceDoc_Model_Pack.zip` bundle packager (`create_voicedoc_pack.py`), and the Jetpack Compose Android app (`VoiceDocAssistantController.kt`) with fail-closed safety gates. **Actual model weights, approved clinical corpus, Android JDK/SDK build, and physical-device acceptance remain pending** — follow [`EXECUTION_GUIDE.md`](EXECUTION_GUIDE.md) and see [`docs/CODE_COMPLETION_TRACKER.md`](docs/CODE_COMPLETION_TRACKER.md). General health information only; never a diagnosis or treatment service.
+
+
 > **A privacy-first, multilingual, fully on-device health-information assistant for Android that accepts speech, retrieves relevant curated medical knowledge locally, runs a lightweight language model on the phone, and returns grounded text or speech without requiring an internet connection for inference.**
 
 ## Hands-on implementation — student checklist

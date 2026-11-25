@@ -1,0 +1,15 @@
+{
+  "rag_text": {
+    "exact_groups": [],
+    "near_pairs": []
+  },
+  "sft_prompt": {
+    "exact_groups": [],
+    "near_pairs": []
+  },
+  "sft_response": {
+    "exact_groups": [],
+    "near_pairs": []
+  },
+  "threshold": 0.78
+}
